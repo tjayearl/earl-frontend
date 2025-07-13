@@ -1,93 +1,56 @@
 body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: sans-serif;
   background: #0f172a;
   color: #f8fafc;
-  display: flex;
-  justify-content: center;
-  padding: 20px;
+  text-align: center;
+  padding: 2rem;
 }
 
-.container {
-  display: grid;
-  grid-template-areas: 
-    "header header"
-    "main aside";
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
-  width: 100%;
-  max-width: 1200px;
-}
-
-header {
-  grid-area: header;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-header .avatar {
-  width: 60px;
-  height: 60px;
+header img.avatar {
+  width: 100px;
   border-radius: 50%;
-  object-fit: cover; /* Ensures the image covers the area without distortion */
-  display: block;
-}
-
-header h1 span {
-  color: #38bdf8;
-}
-
-main {
-  grid-area: main;
-  background: #1e293b;
-  padding: 20px;
-  border-radius: 12px;
-}
-
-.chat-box {
-  height: 400px;
-  overflow-y: auto;
-  margin-bottom: 10px;
-}
-
-.chat-message {
-  margin: 5px 0;
+  border: 2px solid #38bdf8;
 }
 
 form {
-  display: flex;
-  gap: 10px;
+  margin: 1rem 0;
 }
 
-input[type="text"] {
-  flex: 1;
-  padding: 10px;
+input {
+  padding: 0.5rem;
+  border-radius: 5px;
   border: none;
-  border-radius: 8px;
+  width: 60%;
 }
 
 button {
-  padding: 10px 20px;
+  padding: 0.5rem 1rem;
+  margin-left: 0.5rem;
   border: none;
-  background-color: #38bdf8;
-  color: white;
-  border-radius: 8px;
+  background: #38bdf8;
+  color: #fff;
+  border-radius: 5px;
   cursor: pointer;
 }
 
-aside {
-  grid-area: aside;
-  background: #1e293b;
-  padding: 20px;
-  border-radius: 12px;
+#chat-box {
+  text-align: left;
+  margin-top: 1rem;
+  max-width: 600px;
+  margin-inline: auto;
 }
 
-aside h2 {
-  margin-top: 0;
+#chat-box p {
+  margin: 0.3rem 0;
 }
 
-#reminder-list {
+ul#reminder-list {
   list-style: none;
-  padding-left: 0;
+  padding: 0;
+}
+ul#reminder-list li {
+  margin: 0.5rem 0;
+  background: #1e293b;
+  padding: 0.5rem;
+  border-radius: 5px;
 }

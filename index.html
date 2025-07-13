@@ -3,31 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>E.A.R.L - Personal Assistant</title>
+  <title>E.A.R.L</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <header>
-      <img src="./assets/earl-avatar.png" alt="EARL" class="avatar" />
-      <h1>Hello, I’m <span>E.A.R.L</span></h1>
-    </header>
+  <header>
+    <img src="assets/earl-avatar.png" alt="E.A.R.L Avatar" class="avatar" />
+    <h1>Hi, I’m <span>E.A.R.L</span></h1>
+  </header>
 
-    <main>
-      <div id="chat-box" class="chat-box"></div>
+  <main>
+    <section>
       <form id="chat-form">
-        <input type="text" id="user-input" placeholder="Ask me anything..." autocomplete="off" required />
+        <input type="text" id="chat-input" placeholder="Say something..." required />
         <button type="submit">Send</button>
       </form>
-    </main>
+      <div id="chat-box"></div>
+    </section>
 
-    <aside>
+    <section>
       <h2>Reminders</h2>
+      <form id="reminder-form">
+        <input type="text" id="reminder-input" placeholder="Add a reminder..." required />
+        <button type="submit">Add</button>
+      </form>
       <ul id="reminder-list"></ul>
-      <input type="text" id="new-reminder" placeholder="Add a reminder" />
-      <button id="add-reminder">Add</button>
-    </aside>
-  </div>
+    </section>
+  </main>
 
   <script src="script.js"></script>
 </body>
