@@ -7,29 +7,31 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <img src="assets/earl-avatar.png" alt="E.A.R.L Avatar" class="avatar" />
-    <h1>Hi, I’m <span>E.A.R.L</span></h1>
-  </header>
+  <div class="container">
+    <header>
+      <img src="assets/earl-avatar.png" alt="E.A.R.L Avatar" class="avatar" />
+      <h1>Hi, I’m <span>E.A.R.L</span></h1>
+    </header>
 
-  <main>
-    <section>
-      <form id="chat-form">
-        <input type="text" id="chat-input" placeholder="Say something..." required />
-        <button type="submit">Send</button>
-      </form>
-      <div id="chat-box"></div>
-    </section>
+    <main>
+      <section class="chat-panel">
+        <div id="chat-box"></div>
+        <form id="chat-form">
+          <input type="text" id="chat-input" placeholder="Say something..." required />
+          <button type="submit">Send</button>
+        </form>
+      </section>
 
-    <section>
-      <h2>Reminders</h2>
-      <form id="reminder-form">
-        <input type="text" id="reminder-input" placeholder="Add a reminder..." required />
-        <button type="submit">Add</button>
-      </form>
-      <ul id="reminder-list"></ul>
-    </section>
-  </main>
+      <section class="reminders-panel">
+        <h2>Reminders</h2>
+        <ul id="reminder-list"></ul>
+        <form id="reminder-form">
+          <input type="text" id="reminder-input" placeholder="Add a reminder..." required />
+          <button type="submit">Add</button>
+        </form>
+      </section>
+    </main>
+  </div>
 
   <script src="script.js"></script>
 </body>

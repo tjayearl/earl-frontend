@@ -2,25 +2,78 @@ body {
   font-family: sans-serif;
   background: #0f172a;
   color: #f8fafc;
-  text-align: center;
   padding: 2rem;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  width: 100%;
+  max-width: 900px;
+  height: 85vh;
+  background: #1e293b;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 header img.avatar {
   width: 100px;
+  height: 100px;
+  object-fit: cover;
   border-radius: 50%;
   border: 2px solid #38bdf8;
 }
 
-form {
-  margin: 1rem 0;
+header {
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #334155;
+  flex-shrink: 0;
+}
+
+header h1 span {
+  color: #38bdf8;
+}
+
+main {
+  flex-grow: 1;
+  display: flex;
+  overflow: hidden; /* Important for child scrolling */
+}
+
+.chat-panel {
+  flex: 2; /* Chat takes more space */
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border-right: 1px solid #334155;
+}
+
+.reminders-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.reminders-panel h2 {
+  text-align: center;
+  margin-top: 0;
 }
 
 input {
   padding: 0.5rem;
   border-radius: 5px;
   border: none;
-  width: 60%;
+  background: #334155;
+  color: #f8fafc;
+  flex-grow: 1;
 }
 
 button {
@@ -28,29 +81,70 @@ button {
   margin-left: 0.5rem;
   border: none;
   background: #38bdf8;
-  color: #fff;
+  color: #0f172a;
+  font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
 }
 
 #chat-box {
-  text-align: left;
-  margin-top: 1rem;
-  max-width: 600px;
-  margin-inline: auto;
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-#chat-box p {
-  margin: 0.3rem 0;
+/* Styling for the chat bubbles */
+.message {
+  padding: 0.6rem 1rem;
+  border-radius: 18px;
+  max-width: 75%;
+  word-wrap: break-word;
+}
+
+.message p {
+  margin: 0;
+}
+
+.earl-message {
+  background-color: #475569; /* A neutral, darker bubble color */
+  align-self: flex-start; /* Aligns to the left */
+  border-bottom-left-radius: 4px; /* Makes it look more like a bubble */
+}
+
+.user-message {
+  background-color: #38bdf8; /* Using your existing brand blue */
+  color: #0f172a; /* Dark text for better contrast on the blue */
+  align-self: flex-end; /* Aligns to the right */
+  border-bottom-right-radius: 4px; /* Makes it look more like a bubble */
+}
+
+/* Forms at the bottom */
+#chat-form,
+#reminder-form {
+  display: flex;
+  flex-shrink: 0; /* Prevent forms from shrinking */
+  margin-top: 1rem;
 }
 
 ul#reminder-list {
+  flex-grow: 1;
+  overflow-y: auto;
   list-style: none;
   padding: 0;
 }
+
 ul#reminder-list li {
   margin: 0.5rem 0;
   background: #1e293b;
   padding: 0.5rem;
   border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+ul#reminder-list li:hover {
+  background-color: #334155;
 }

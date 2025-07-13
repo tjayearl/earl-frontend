@@ -9,9 +9,21 @@ const reminderInput = document.getElementById("reminder-input");
 const reminderList = document.getElementById("reminder-list");
 
 function addMessage(sender, text) {
+  const messageDiv = document.createElement("div");
+  messageDiv.classList.add("message");
+
+  // Add a specific class for user vs. AI for styling
+  const senderClass = sender === "You" ? "user-message" : "earl-message";
+  messageDiv.classList.add(senderClass);
+
   const p = document.createElement("p");
-  p.innerHTML = `<strong>${sender}:</strong> ${text}`;
-  chatBox.appendChild(p);
+  p.textContent = text; // Use textContent for security and simplicity
+  messageDiv.appendChild(p);
+
+  chatBox.appendChild(messageDiv);
+
+  // Scroll to the bottom of the chat box
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 chatForm.addEventListener("submit", async (e) => {
