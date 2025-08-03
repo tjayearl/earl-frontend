@@ -8,22 +8,34 @@
 </head>
 <body>
   <div class="container">
-    <header>
-      <img src="assets/earl-avatar.png" alt="E.A.R.L Avatar" class="avatar" />
-      <h1>Hi, I’m <span>E.A.R.L</span></h1>
-    </header>
+    <nav>
+      <a href="#" class="nav-link active" data-page="home">Home</a>
+      <a href="#" class="nav-link" data-page="chat">Chat</a>
+      <a href="#" class="nav-link" data-page="reminders">Reminders</a>
+    </nav>
 
     <main>
-      <section class="chat-panel">
+      <section id="home" class="page active">
+        <h1 class="glow">E.A.R.L AI</h1>
+      </section>
+
+      <section id="chat" class="page">
+        <div class="section-header">
+          <h2>Chat with E.A.R.L</h2>
+          <button id="clear-chat-btn" class="btn-secondary">Clear Chat</button>
+        </div>
         <div id="chat-box"></div>
         <form id="chat-form">
           <input type="text" id="chat-input" placeholder="Say something..." required />
-          <button type="submit">Send</button>
+          <button type="submit" class="btn-primary">Send</button>
         </form>
       </section>
 
-      <section class="reminders-panel">
-        <h2>Reminders</h2>
+      <section id="reminders" class="page">
+        <div class="section-header">
+          <h2>Reminders</h2>
+          <button id="clear-reminders-btn" class="btn-secondary">Clear All</button>
+        </div>
         <ul id="reminder-list"></ul>
         <form id="reminder-form">
           <input type="text" id="reminder-input" placeholder="Add a reminder..." required />

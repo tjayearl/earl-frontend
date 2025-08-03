@@ -9,6 +9,39 @@ const reminderForm = document.getElementById("reminder-form");
 const reminderInput = document.getElementById("reminder-input");
 const reminderList = document.getElementById("reminder-list");
 
+const clearChatBtn = document.getElementById("clear-chat-btn");
+const clearRemindersBtn = document.getElementById("clear-reminders-btn");
+
+const navLinks = document.querySelectorAll(".nav-link");
+const pages = document.querySelectorAll(".page");
+
+// ✅ Handle page navigation
+function showPage(pageId) {
+  // Hide all pages and deactivate all links
+  pages.forEach((page) => page.classList.remove("active"));
+  navLinks.forEach((link) => link.classList.remove("active"));
+
+  // Show the target page
+  const targetPage = document.getElementById(pageId);
+  if (targetPage) {
+    targetPage.classList.add("active");
+  }
+
+  // Activate the corresponding nav link
+  const targetLink = document.querySelector(`.nav-link[data-page="${pageId}"]`);
+  if (targetLink) {
+    targetLink.classList.add("active");
+  }
+}
+
+navLinks.forEach((link) => {
+  link.addEventListener("click", (e) => {
+    e.preventDefault(); // Prevent URL change
+    const pageId = e.target.dataset.page;
+    showPage(pageId);
+  });
+});
+
 // ✅ Adds message to chat UI
 function addMessage(sender, text) {
   const messageDiv = document.createElement("div");
@@ -18,11 +51,29 @@ function addMessage(sender, text) {
   messageDiv.classList.add(senderClass);
 
   const p = document.createElement("p");
-  p.textContent = `${sender}: ${text}`;
+  p.textContent = text;
   messageDiv.appendChild(p);
 
   chatBox.appendChild(messageDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// ✅ Shows a "typing..." indicator
+function showTypingIndicator() {
+  const messageDiv = document.createElement("div");
+  messageDiv.classList.add("message", "earl-message", "typing-indicator");
+  // Simple animated dots
+  messageDiv.innerHTML = `<p><span>.</span><span>.</span><span>.</span></p>`;
+  chatBox.appendChild(messageDiv);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// ✅ Hides the "typing..." indicator
+function hideTypingIndicator() {
+  const indicator = document.querySelector(".typing-indicator");
+  if (indicator) {
+    indicator.remove();
+  }
 }
 
 // ✅ Handle chat form submit
@@ -34,23 +85,26 @@ chatForm.addEventListener("submit", async (e) => {
   addMessage("You", message);
   chatInput.value = "";
 
+  showTypingIndicator();
+
   try {
     const res = await fetch(`${BASE_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message }),
     });
-
     if (!res.ok) {
       throw new Error(`Server error: ${res.status}`);
     }
-
     const data = await res.json();
     console.log("E.A.R.L replied:", data.reply);
     addMessage("E.A.R.L", data.reply);
   } catch (err) {
     console.error("Chat error:", err);
     addMessage("E.A.R.L", "⚠️ I couldn't reach my brain. Try again.");
+  } finally {
+    // This runs whether the try succeeds or fails
+    hideTypingIndicator();
   }
 });
 
@@ -100,13 +154,64 @@ async function loadReminders() {
 
 // ✅ Delete reminder
 async function deleteReminder(id) {
+  // Added confirmation for single delete for consistency
+  if (!confirm("Are you sure you want to delete this reminder?")) {
+    return;
+  }
   try {
-    await fetch(`${BASE_URL}/reminders/${id}`, {
+    const res = await fetch(`${BASE_URL}/reminders/${id}`, {
       method: "DELETE",
     });
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`);
+    }
     loadReminders();
   } catch (err) {
     console.error("Delete reminder failed:", err);
+    alert("⚠️ Failed to delete reminder.");
+  }
+}
+
+// ✅ Clear all reminders
+async function clearAllReminders() {
+  if (!confirm("Are you sure you want to delete ALL reminders? This cannot be undone.")) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BASE_URL}/reminders`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`);
+    }
+
+    loadReminders(); // This will clear and reload the (now empty) list
+  } catch (err) {
+    console.error("Failed to clear reminders:", err);
+    alert("⚠️ Failed to clear reminders.");
+  }
+}
+
+// ✅ Clear chat history
+async function clearChat() {
+  if (!confirm("Are you sure you want to clear the entire chat history? This cannot be undone.")) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BASE_URL}/chat/history`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+    chatBox.innerHTML = ""; // Clear the UI immediately
+    addMessage("E.A.R.L", "Chat history cleared.");
+  } catch (err) {
+    console.error("Failed to clear chat:", err);
+    addMessage("E.A.R.L", "⚠️ Oops, I couldn't clear the chat history.");
   }
 }
 
@@ -122,4 +227,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   loadReminders();
+
+  // ✅ Wire up clear buttons
+  clearChatBtn.addEventListener("click", clearChat);
+  clearRemindersBtn.addEventListener("click", clearAllReminders);
 });

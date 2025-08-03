@@ -22,49 +22,98 @@ body {
   overflow: hidden;
 }
 
-header img.avatar {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 2px solid #38bdf8;
-}
-
-header {
-  padding: 1rem;
-  text-align: center;
+/* --- Navigation Bar --- */
+nav {
+  display: flex;
+  padding: 0.5rem 1rem;
+  background: #0f172a;
   border-bottom: 1px solid #334155;
   flex-shrink: 0;
+  gap: 0.5rem;
 }
 
-header h1 span {
-  color: #38bdf8;
+.nav-link {
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  color: #cbd5e1;
+  border-radius: 6px;
+  transition: background-color 0.2s, color 0.2s;
 }
 
+.nav-link:hover {
+  background-color: #334155;
+  color: #f8fafc;
+}
+
+.nav-link.active {
+  background-color: #38bdf8;
+  color: #0f172a;
+  font-weight: bold;
+}
+
+/* --- Main Content & Pages --- */
 main {
   flex-grow: 1;
   display: flex;
+  flex-direction: column;
   overflow: hidden; /* Important for child scrolling */
 }
 
-.chat-panel {
-  flex: 2; /* Chat takes more space */
-  display: flex;
+.page {
+  display: none; /* Hide pages by default */
   flex-direction: column;
+  flex-grow: 1;
   padding: 1rem;
-  border-right: 1px solid #334155;
+  overflow: hidden; /* Each page manages its own overflow */
 }
 
-.reminders-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
+.page.active {
+  display: flex; /* Show the active page */
+  animation: fadeIn 0.4s ease-in-out;
 }
 
-.reminders-panel h2 {
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Page-specific styles --- */
+#home {
+  justify-content: center;
+  align-items: center;
   text-align: center;
-  margin-top: 0;
+}
+
+.glow {
+  font-size: 4.5rem;
+  font-weight: 700;
+  color: #f8fafc;
+  animation: glow-effect 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow-effect {
+  from {
+    text-shadow: 0 0 10px #fff, 0 0 20px #38bdf8, 0 0 30px #38bdf8;
+  }
+  to {
+    text-shadow: 0 0 20px #fff, 0 0 35px #38bdf8, 0 0 45px #38bdf8;
+  }
+}
+
+/* Section Header for Chat/Reminders */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #334155;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
 }
 
 input {
@@ -76,7 +125,8 @@ input {
   flex-grow: 1;
 }
 
-button {
+/* Primary button style for forms */
+#chat-form button, #reminder-form button {
   padding: 0.5rem 1rem;
   margin-left: 0.5rem;
   border: none;
@@ -85,6 +135,25 @@ button {
   font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#chat-form button:hover, #reminder-form button:hover {
+  background-color: #7dd3fc; /* A lighter blue for hover */
+}
+
+/* Secondary button style for clear buttons */
+.btn-secondary {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  background: #475569;
+  color: #cbd5e1;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.btn-secondary:hover {
+  background-color: #64748b;
 }
 
 #chat-box {
@@ -102,6 +171,7 @@ button {
   border-radius: 18px;
   max-width: 75%;
   word-wrap: break-word;
+  animation: slideIn 0.3s ease-out;
 }
 
 .message p {
@@ -119,6 +189,39 @@ button {
   color: #0f172a; /* Dark text for better contrast on the blue */
   align-self: flex-end; /* Aligns to the right */
   border-bottom-right-radius: 4px; /* Makes it look more like a bubble */
+}
+
+/* Typing indicator styles */
+.typing-indicator p {
+  display: flex;
+  align-items: baseline;
+}
+
+.typing-indicator span {
+  animation: blink 1.4s infinite both;
+  height: 5px;
+  width: 5px;
+  background-color: #f8fafc;
+  display: inline-block;
+  border-radius: 50%;
+  margin: 0 1px;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink { 0% { opacity: 0.2; } 20% { opacity: 1; } 100% { opacity: 0.2; } }
+
+/* Animation for new messages */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Forms at the bottom */
