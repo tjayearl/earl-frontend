@@ -288,6 +288,20 @@ function inputDecimal(dot) {
   }
 }
 
+function handleBackspace() {
+  const { displayValue, waitingForSecondValue } = calculatorState;
+  // If an operator was just pressed, a backspace shouldn't edit the previous result.
+  if (waitingForSecondValue) {
+    return;
+  }
+
+  if (displayValue.length > 1) {
+    calculatorState.displayValue = displayValue.slice(0, -1);
+  } else {
+    calculatorState.displayValue = '0';
+  }
+}
+
 // ✅ Load on page start
 window.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -334,8 +348,8 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
     } else if (action === 'clear') {
       resetCalculator();
-    } else if (action === 'sign') {
-      calculatorState.displayValue = (parseFloat(displayedNum) * -1).toString();
+    } else if (action === 'backspace') {
+      handleBackspace();
     } else if (action === 'percent') {
       calculatorState.displayValue = (parseFloat(displayedNum) / 100).toString();
     }
