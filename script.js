@@ -215,6 +215,79 @@ async function clearChat() {
   }
 }
 
+// ✅ Calculator Logic
+const calculator = document.querySelector('.calculator-grid');
+const calculatorDisplay = calculator.querySelector('.calculator-display');
+const calculatorKeys = calculator.querySelector('.calculator-keys');
+
+const calculatorState = {
+  displayValue: '0',
+  firstValue: null,
+  waitingForSecondValue: false,
+  operator: null,
+};
+
+function updateDisplay() {
+  calculatorDisplay.textContent = calculatorState.displayValue;
+}
+
+function handleOperator(nextOperator) {
+  const { firstValue, displayValue, operator } = calculatorState;
+  const inputValue = parseFloat(displayValue);
+
+  if (operator && calculatorState.waitingForSecondValue) {
+    calculatorState.operator = nextOperator;
+    return;
+  }
+
+  if (firstValue === null && !isNaN(inputValue)) {
+    calculatorState.firstValue = inputValue;
+  } else if (operator) {
+    const result = calculate(firstValue, inputValue, operator);
+    calculatorState.displayValue = `${parseFloat(result.toFixed(7))}`;
+    calculatorState.firstValue = result;
+  }
+
+  calculatorState.waitingForSecondValue = true;
+  calculatorState.operator = nextOperator;
+}
+
+function calculate(n1, n2, operator) {
+  if (operator === 'add') return n1 + n2;
+  if (operator === 'subtract') return n1 - n2;
+  if (operator === 'multiply') return n1 * n2;
+  if (operator === 'divide') return n1 / n2;
+  return n2;
+}
+
+function resetCalculator() {
+  calculatorState.displayValue = '0';
+  calculatorState.firstValue = null;
+  calculatorState.waitingForSecondValue = false;
+  calculatorState.operator = null;
+}
+
+function inputDigit(digit) {
+  const { displayValue, waitingForSecondValue } = calculatorState;
+  if (waitingForSecondValue === true) {
+    calculatorState.displayValue = digit;
+    calculatorState.waitingForSecondValue = false;
+  } else {
+    calculatorState.displayValue = displayValue === '0' ? digit : displayValue + digit;
+  }
+}
+
+function inputDecimal(dot) {
+  if (calculatorState.waitingForSecondValue) {
+    calculatorState.displayValue = '0.';
+    calculatorState.waitingForSecondValue = false;
+    return;
+  }
+  if (!calculatorState.displayValue.includes(dot)) {
+    calculatorState.displayValue += dot;
+  }
+}
+
 // ✅ Load on page start
 window.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -231,4 +304,42 @@ window.addEventListener("DOMContentLoaded", async () => {
   // ✅ Wire up clear buttons
   clearChatBtn.addEventListener("click", clearChat);
   clearRemindersBtn.addEventListener("click", clearAllReminders);
+
+  // ✅ Wire up calculator
+  updateDisplay();
+  calculatorKeys.addEventListener('click', (e) => {
+    const { target } = e;
+    if (!target.matches('button')) {
+      return;
+    }
+
+    const { action } = target.dataset;
+    const keyContent = target.textContent;
+    const displayedNum = calculatorState.displayValue;
+
+    if (!action) { // It's a number
+      inputDigit(keyContent);
+    } else if (action === 'decimal') {
+      inputDecimal('.');
+    } else if (action === 'add' || action === 'subtract' || action === 'multiply' || action === 'divide') {
+      handleOperator(action);
+    } else if (action === 'calculate') {
+      const { firstValue, operator, displayValue } = calculatorState;
+      if (firstValue != null && operator) {
+        const result = calculate(firstValue, parseFloat(displayValue), operator);
+        calculatorState.displayValue = `${parseFloat(result.toFixed(7))}`;
+        calculatorState.firstValue = null;
+        calculatorState.operator = null;
+        calculatorState.waitingForSecondValue = false;
+      }
+    } else if (action === 'clear') {
+      resetCalculator();
+    } else if (action === 'sign') {
+      calculatorState.displayValue = (parseFloat(displayedNum) * -1).toString();
+    } else if (action === 'percent') {
+      calculatorState.displayValue = (parseFloat(displayedNum) / 100).toString();
+    }
+
+    updateDisplay();
+  });
 });

@@ -12,6 +12,7 @@
       <a href="#" class="nav-link active" data-page="home">Home</a>
       <a href="#" class="nav-link" data-page="chat">Chat</a>
       <a href="#" class="nav-link" data-page="reminders">Reminders</a>
+      <a href="#" class="nav-link" data-page="calculator">Calculator</a>
     </nav>
 
     <main>
@@ -41,6 +42,33 @@
           <input type="text" id="reminder-input" placeholder="Add a reminder..." required />
           <button type="submit">Add</button>
         </form>
+      </section>
+
+      <section id="calculator" class="page">
+        <div class="calculator-grid">
+          <div class="calculator-display">0</div>
+          <div class="calculator-keys">
+            <button data-action="clear" class="key--operator">AC</button>
+            <button data-action="sign" class="key--operator">+/-</button>
+            <button data-action="percent" class="key--operator">%</button>
+            <button data-action="divide" class="key--operator">&divide;</button>
+            <button data-number="7">7</button>
+            <button data-number="8">8</button>
+            <button data-number="9">9</button>
+            <button data-action="multiply" class="key--operator">&times;</button>
+            <button data-number="4">4</button>
+            <button data-number="5">5</button>
+            <button data-number="6">6</button>
+            <button data-action="subtract" class="key--operator">-</button>
+            <button data-number="1">1</button>
+            <button data-number="2">2</button>
+            <button data-number="3">3</button>
+            <button data-action="add" class="key--operator">+</button>
+            <button data-number="0" class="key--zero">0</button>
+            <button data-action="decimal">.</button>
+            <button data-action="calculate" class="key--operator key--equal">=</button>
+          </div>
+        </div>
       </section>
     </main>
   </div>

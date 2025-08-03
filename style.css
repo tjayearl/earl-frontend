@@ -249,3 +249,67 @@ ul#reminder-list li {
 ul#reminder-list li:hover {
   background-color: #334155;
 }
+
+/* --- Calculator Styles --- */
+#calculator {
+  justify-content: center;
+  align-items: center;
+}
+
+.calculator-grid {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  width: 100%;
+  max-width: 450px;
+  background-color: #0f172a;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+
+.calculator-display {
+  background-color: #1e293b;
+  color: #f8fafc;
+  font-size: 3.5rem;
+  padding: 1.5rem;
+  text-align: right;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+
+.calculator-keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background-color: #334155; /* For the grid gaps */
+}
+
+.calculator-keys button {
+  padding: 1.5rem 0;
+  font-size: 1.8rem;
+  border: none;
+  background-color: #475569;
+  color: #f8fafc;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.calculator-keys button:hover {
+  background-color: #64748b;
+}
+
+.key--operator {
+  background-color: #334155;
+}
+
+.key--operator:hover {
+  background-color: #475569;
+}
+
+.key--equal {
+  background-color: #38bdf8;
+}
+
+.key--zero {
+  grid-column: span 2;
+}
