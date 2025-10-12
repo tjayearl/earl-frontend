@@ -7,6 +7,12 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="loader">
+    <div class="loader-content">
+      <h1 class="glow">E.A.R.L AI</h1>
+      <p>Booting up...</p>
+    </div>
+  </div>
   <div class="container">
     <nav>
       <a href="#" class="nav-link active" data-page="home">Home</a>
@@ -17,7 +23,14 @@
 
     <main>
       <section id="home" class="page active">
-        <h1 class="glow">E.A.R.L AI</h1>
+        <div class="dashboard-grid">
+          <div class="dashboard-card" data-page="chat">
+            <h3>Chat</h3><p>Talk with E.A.R.L</p></div>
+          <div class="dashboard-card" data-page="reminders">
+            <h3>Reminders</h3><p>Manage your tasks</p></div>
+          <div class="dashboard-card" data-page="calculator">
+            <h3>Calculator</h3><p>For complex calculations</p></div>
+        </div>
       </section>
 
       <section id="chat" class="page">

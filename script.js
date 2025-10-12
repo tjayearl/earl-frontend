@@ -14,6 +14,7 @@ const clearRemindersBtn = document.getElementById("clear-reminders-btn");
 
 const navLinks = document.querySelectorAll(".nav-link");
 const pages = document.querySelectorAll(".page");
+const dashboardCards = document.querySelectorAll(".dashboard-card");
 
 // ✅ Handle page navigation
 function showPage(pageId) {
@@ -38,6 +39,14 @@ navLinks.forEach((link) => {
   link.addEventListener("click", (e) => {
     e.preventDefault(); // Prevent URL change
     const pageId = e.target.dataset.page;
+    showPage(pageId);
+  });
+});
+
+// ✅ Handle dashboard card clicks
+dashboardCards.forEach((card) => {
+  card.addEventListener("click", (e) => {
+    const pageId = e.currentTarget.dataset.page;
     showPage(pageId);
   });
 });
@@ -354,6 +363,11 @@ function handleKeyPress(key, type) {
 
 // ✅ Load on page start
 window.addEventListener("DOMContentLoaded", async () => {
+  // Hide loader after a short delay to let animations run
+  const loader = document.getElementById('loader');
+  setTimeout(() => {
+    loader.classList.add('hidden');
+  }, 500); // Adjust delay as needed
   try {
     const res = await fetch(`${BASE_URL}/chat/history`);
     const history = await res.json();
