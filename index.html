@@ -142,10 +142,135 @@
 
       <section id="settings" class="page">
         <div class="section-header"><h2>Settings</h2></div>
-        <p class="placeholder-text">The "Settings" page is coming soon!</p>
+        <div class="settings-container">
+          <h3>AI Personality & Behavior</h3>
+
+          <div class="setting-group">
+            <label>AI Tone</label>
+            <div class="radio-group" id="ai-tone-group">
+              <label><input type="radio" name="ai-tone" value="calm"> Calm</label>
+              <label><input type="radio" name="ai-tone" value="playful"> Playful</label>
+              <label><input type="radio" name="ai-tone" value="mentor"> Mentor</label>
+              <label><input type="radio" name="ai-tone" value="analytical"> Analytical</label>
+              <label><input type="radio" name="ai-tone" value="philosophical"> Philosophical</label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label>Response Style</label>
+            <div class="radio-group" id="response-style-group">
+              <label><input type="radio" name="response-style" value="concise"> Short & Concise</label>
+              <label><input type="radio" name="response-style" value="balanced"> Balanced</label>
+              <label><input type="radio" name="response-style" value="detailed"> Detailed</label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label>Temperament</label>
+            <div class="slider-group">
+              <div class="slider-control"><label for="curiosity-slider">Curiosity</label><input type="range" id="curiosity-slider" min="0" max="100"><span id="curiosity-value"></span></div>
+              <div class="slider-control"><label for="formality-slider">Formality</label><input type="range" id="formality-slider" min="0" max="100"><span id="formality-value"></span></div>
+              <div class="slider-control"><label for="empathy-slider">Empathy</label><input type="range" id="empathy-slider" min="0" max="100"><span id="empathy-value"></span></div>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label>Conversation Memory (Local)</label>
+            <label class="toggle-switch"><input type="checkbox" id="memory-toggle"><span class="toggle-slider"></span></label>
+          </div>
+
+          <h3 class="settings-divider">Interface & Theme</h3>
+
+          <div class="setting-group">
+            <label>Appearance Mode</label>
+            <div class="radio-group" id="appearance-mode-group">
+              <label><input type="radio" name="appearance-mode" value="dark"> 🕶️ Dark</label>
+              <label><input type="radio" name="appearance-mode" value="light"> ☀️ Light</label>
+              <label><input type="radio" name="appearance-mode" value="ai"> 🧬 AI</label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label>Accent Color</label>
+            <div class="radio-group color-picker" id="accent-color-group">
+              <label><input type="radio" name="accent-color" value="blue"><span class="color-swatch" style="background: #38bdf8;"></span></label>
+              <label><input type="radio" name="accent-color" value="pink"><span class="color-swatch" style="background: #f472b6;"></span></label>
+              <label><input type="radio" name="accent-color" value="teal"><span class="color-swatch" style="background: #2dd4bf;"></span></label>
+              <label><input type="radio" name="accent-color" value="gold"><span class="color-swatch" style="background: #facc15;"></span></label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label for="font-select">Font Style</label>
+            <select id="font-select" class="settings-select">
+              <option value="sans-serif">Modern (Sans-serif)</option>
+              <option value="monospace">Terminal (Monospace)</option>
+              <option value="system-ui">System Default</option>
+            </select>
+          </div>
+
+          <h3 class="settings-divider">Memory & Learning Preferences</h3>
+
+          <div class="setting-group">
+            <label>Memory Retention Level</label>
+            <div class="radio-group" id="memory-retention-group">
+              <label><input type="radio" name="memory-retention" value="minimal"> Minimal (Privacy)</label>
+              <label><input type="radio" name="memory-retention" value="normal"> Normal (Summary)</label>
+              <label><input type="radio" name="memory-retention" value="deep"> Deep (Detailed)</label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label>Weekly Learning Time</label>
+            <div id="learning-time-chart" class="chart-container">
+              <!-- Graph will be rendered here by JS -->
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label>Local Logs</label>
+            <div class="button-group">
+              <button id="download-log-btn" class="btn-secondary">Download Activity Log</button>
+              <button id="view-sessions-btn" class="btn-secondary">View Last 5 Sessions</button>
+            </div>
+          </div>
+
+          <h3 class="settings-divider">User Experience Customization</h3>
+
+          <div class="setting-group">
+            <label>Startup Animation</label>
+            <label class="toggle-switch"><input type="checkbox" id="startup-animation-toggle"><span class="toggle-slider"></span></label>
+          </div>
+
+          <div class="setting-group">
+            <label for="greeting-message-input">Custom Greeting Message</label>
+            <input type="text" id="greeting-message-input" class="settings-input" placeholder="e.g., Rise and shine, {user}...">
+          </div>
+
+          <div class="setting-group">
+            <label>Sound Effects</label>
+            <div class="sub-setting-group">
+              <label class="toggle-switch"><input type="checkbox" id="system-sounds-toggle"><span class="toggle-slider"></span> Enable navigation sounds</label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label>Typing Animation</label>
+            <label class="toggle-switch"><input type="checkbox" id="typing-animation-toggle"><span class="toggle-slider"></span> Enable typewriter effect</label>
+          </div>
+        </div>
       </section>
 
     </main>
+  </div>
+
+  <!-- Modal for viewing sessions -->
+  <div id="sessions-modal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <h3>Last 5 Sessions</h3>
+      <pre id="sessions-log-content"></pre>
+    </div>
   </div>
 
   <!-- Audio element for navigation sound -->

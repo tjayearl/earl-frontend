@@ -31,6 +31,9 @@ function showPage(pageId) {
   pages.forEach((page) => page.classList.remove("active"));
   navLinks.forEach((link) => link.classList.remove("active"));
 
+  // Save last visited page
+  if (!isInitialPageLoad) localStorage.setItem('lastVisitedPage', pageId);
+
   // Show the target page
   const targetPage = document.getElementById(pageId);
   if (targetPage) {
@@ -44,7 +47,7 @@ function showPage(pageId) {
   }
 
   // Play sound on navigation, but not on initial load
-  if (!isInitialPageLoad && (!currentPage || currentPage.id !== pageId)) {
+  if (getAiSettings().systemSounds && !isInitialPageLoad && (!currentPage || currentPage.id !== pageId)) {
     if (navSound) {
       navSound.currentTime = 0;
       navSound.play().catch(e => console.error("Sound play failed:", e));
@@ -171,20 +174,24 @@ chatForm.addEventListener("submit", async (e) => {
   showTypingIndicator();
 
   try {
+    // Get the latest AI settings
+    const settings = getAiSettings();
+
     const res = await fetch(`${BASE_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
+      // Send message and personality settings to the backend
+      body: JSON.stringify({ message, settings }),
     });
     if (!res.ok) {
       throw new Error(`Server error: ${res.status}`);
     }
     const data = await res.json();
     console.log("E.A.R.L replied:", data.reply);
-    addMessage("E.A.R.L", data.reply, true); // Use typewriter for new replies
+    addMessage("E.A.R.L", data.reply, getAiSettings().typingAnimation); // Use typewriter for new replies
   } catch (err) {
     console.error("Chat error:", err);
-    addMessage("E.A.R.L", "⚠️ I couldn't reach my brain. Try again.", true);
+    addMessage("E.A.R.L", "⚠️ I couldn't reach my brain. Try again.", getAiSettings().typingAnimation);
   } finally {
     // This runs whether the try succeeds or fails
     hideTypingIndicator();
@@ -297,10 +304,10 @@ async function clearChat() {
     if (!res.ok) throw new Error(`Server error: ${res.status}`);
 
     chatBox.innerHTML = ""; // Clear the UI immediately
-    addMessage("E.A.R.L", "Chat history cleared.", true);
+    addMessage("E.A.R.L", "Chat history cleared.", getAiSettings().typingAnimation);
   } catch (err) {
     console.error("Failed to clear chat:", err);
-    addMessage("E.A.R.L", "⚠️ Oops, I couldn't clear the chat history.", true);
+    addMessage("E.A.R.L", "⚠️ Oops, I couldn't clear the chat history.", getAiSettings().typingAnimation);
   }
 }
 
@@ -441,6 +448,147 @@ function handleKeyPress(key, type) {
   updateDisplay();
 }
 
+// ✅ AI Personality Settings Logic
+const defaultAiSettings = {
+  tone: 'calm',
+  style: 'balanced',
+  curiosity: 80,
+  formality: 40,
+  empathy: 70,
+  memory: true,
+  // New visual settings
+  appearance: 'dark',
+  accent: 'blue',
+  font: 'sans-serif',
+  retention: 'normal',
+  // UX settings
+  startupAnimation: true,
+  greetingMessage: "Hello, {user}. Neural state: optimal.",
+  systemSounds: true,
+  typingAnimation: true,
+};
+
+function getAiSettings() {
+  const saved = localStorage.getItem('aiSettings');
+  if (saved) {
+    // Merge saved settings with defaults to handle new settings gracefully
+    return { ...defaultAiSettings, ...JSON.parse(saved) };
+  }
+  return defaultAiSettings;
+}
+
+function saveAiSettings(settings) {
+  localStorage.setItem('aiSettings', JSON.stringify(settings));
+}
+
+function initializeSettings() {
+  const settings = getAiSettings();
+  applyThemeSettings(settings); // Apply visual settings on load
+
+  // Set UI elements from saved settings
+  document.querySelector(`input[name="ai-tone"][value="${settings.tone}"]`).checked = true;
+  document.querySelector(`input[name="response-style"][value="${settings.style}"]`).checked = true;
+
+  const curiositySlider = document.getElementById('curiosity-slider');
+  const formalitySlider = document.getElementById('formality-slider');
+  const empathySlider = document.getElementById('empathy-slider');
+  const curiosityValue = document.getElementById('curiosity-value');
+  const formalityValue = document.getElementById('formality-value');
+  const empathyValue = document.getElementById('empathy-value');
+  const memoryToggle = document.getElementById('memory-toggle');
+
+  curiositySlider.value = settings.curiosity;
+  formalitySlider.value = settings.formality;
+  empathySlider.value = settings.empathy;
+  curiosityValue.textContent = `${settings.curiosity}%`;
+  formalityValue.textContent = `${settings.formality}%`;
+  empathyValue.textContent = `${settings.empathy}%`;
+  memoryToggle.checked = settings.memory;
+
+  // UX Settings
+  const startupToggle = document.getElementById('startup-animation-toggle');
+  const greetingInput = document.getElementById('greeting-message-input');
+  const soundsToggle = document.getElementById('system-sounds-toggle');
+  const typingToggle = document.getElementById('typing-animation-toggle');
+
+
+  // Add event listeners to save changes
+  document.getElementById('ai-tone-group').addEventListener('change', (e) => {
+    settings.tone = e.target.value;
+    saveAiSettings(settings);
+  });
+  document.getElementById('response-style-group').addEventListener('change', (e) => {
+    settings.style = e.target.value;
+    saveAiSettings(settings);
+  });
+  curiositySlider.addEventListener('input', (e) => {
+    settings.curiosity = e.target.value;
+    curiosityValue.textContent = `${e.target.value}%`;
+    saveAiSettings(settings);
+  });
+  formalitySlider.addEventListener('input', (e) => {
+    settings.formality = e.target.value;
+    formalityValue.textContent = `${e.target.value}%`;
+    saveAiSettings(settings);
+  });
+  empathySlider.addEventListener('input', (e) => {
+    settings.empathy = e.target.value;
+    empathyValue.textContent = `${e.target.value}%`;
+    saveAiSettings(settings);
+  });
+  memoryToggle.addEventListener('change', (e) => {
+    settings.memory = e.target.checked;
+    saveAiSettings(settings);
+  });
+
+  // --- New Interface Settings ---
+  document.getElementById('appearance-mode-group').addEventListener('change', (e) => {
+    settings.appearance = e.target.value;
+    applyThemeSettings(settings);
+    saveAiSettings(settings);
+  });
+  document.getElementById('accent-color-group').addEventListener('change', (e) => {
+    settings.accent = e.target.value;
+    applyThemeSettings(settings);
+    saveAiSettings(settings);
+  });
+  document.getElementById('font-select').addEventListener('change', (e) => {
+    settings.font = e.target.value;
+    applyThemeSettings(settings);
+    saveAiSettings(settings);
+  });
+  document.getElementById('memory-retention-group').addEventListener('change', (e) => {
+    settings.retention = e.target.value;
+    saveAiSettings(settings);
+  });
+
+  document.getElementById('download-log-btn').addEventListener('click', downloadActivityLog);
+  initializeModal();
+
+  // --- UX Settings Listeners ---
+  startupToggle.checked = settings.startupAnimation;
+  greetingInput.value = settings.greetingMessage;
+  soundsToggle.checked = settings.systemSounds;
+  typingToggle.checked = settings.typingAnimation;
+
+  startupToggle.addEventListener('change', (e) => {
+    settings.startupAnimation = e.target.checked;
+    saveAiSettings(settings);
+  });
+  greetingInput.addEventListener('change', (e) => {
+    settings.greetingMessage = e.target.value;
+    saveAiSettings(settings);
+  });
+  soundsToggle.addEventListener('change', (e) => {
+    settings.systemSounds = e.target.checked;
+    saveAiSettings(settings);
+  });
+  typingToggle.addEventListener('change', (e) => {
+    settings.typingAnimation = e.target.checked;
+    saveAiSettings(settings);
+  });
+}
+
 // ✅ Dynamic Identity Layer Logic
 const modes = {
   focus: { icon: '🟢', greeting: "You're in Focus Mode. Let's get things done." },
@@ -449,17 +597,47 @@ const modes = {
   relax: { icon: '⚪', greeting: "You're in Relax Mode. Time to wind down." },
 };
 
+function applyThemeSettings(settings) {
+  const body = document.body;
+
+  // 1. Appearance Mode
+  body.classList.remove('theme-light', 'theme-dark', 'theme-ai');
+  body.classList.add(`theme-${settings.appearance}`);
+
+  // 2. Accent Color
+  const accentColors = {
+    blue: { color: '#38bdf8', text: '#0f172a' },
+    pink: { color: '#f472b6', text: '#0f172a' },
+    teal: { color: '#2dd4bf', text: '#0f172a' },
+    gold: { color: '#facc15', text: '#0f172a' },
+  };
+  const accent = accentColors[settings.accent] || accentColors.blue;
+  body.style.setProperty('--accent-color', accent.color);
+  body.style.setProperty('--accent-text', accent.text);
+  body.style.setProperty('--glow-color', accent.color);
+
+  // 3. Font Style
+  body.style.fontFamily = `var(--font-${settings.font})`;
+
+  // Set checked state in UI
+  const checkedAppearance = document.querySelector(`input[name="appearance-mode"][value="${settings.appearance}"]`);
+  if (checkedAppearance) checkedAppearance.checked = true;
+  const checkedAccent = document.querySelector(`input[name="accent-color"][value="${settings.accent}"]`);
+  if (checkedAccent) checkedAccent.checked = true;
+  document.getElementById('font-select').value = settings.font;
+}
+
 function applyTimeBasedTheme() {
   const hour = new Date().getHours();
   const body = document.body;
   body.classList.remove('theme-morning', 'theme-evening', 'theme-night');
 
   if (hour >= 6 && hour < 17) { // 6am to 5pm
-    body.classList.add('theme-morning');
+    // body.classList.add('theme-morning'); // This is now handled by manual theme settings
   } else if (hour >= 22 || hour < 6) { // 10pm to 6am
-    body.classList.add('theme-night');
+    // body.classList.add('theme-night');
   } else { // 5pm to 10pm
-    body.classList.add('theme-evening');
+    // body.classList.add('theme-evening');
   }
 }
 
@@ -487,17 +665,65 @@ function initializeIdentity() {
   });
 }
 
+// ✅ Modal Logic
+function initializeModal() {
+  const modal = document.getElementById('sessions-modal');
+  const viewBtn = document.getElementById('view-sessions-btn');
+  const closeBtn = modal.querySelector('.modal-close');
+
+  viewBtn.addEventListener('click', () => {
+    const sessions = JSON.parse(localStorage.getItem('sessions')) || [];
+    const lastFive = sessions.slice(-5).reverse(); // Newest first
+    const logContent = document.getElementById('sessions-log-content');
+    if (lastFive.length > 0) {
+      logContent.textContent = lastFive.map((s, i) => `Session ${i+1}: ${new Date(s).toLocaleString()}`).join('\n');
+    } else {
+      logContent.textContent = "No session data recorded yet.";
+    }
+    modal.style.display = 'block';
+  });
+
+  closeBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  window.addEventListener('click', (e) => {
+    if (e.target == modal) {
+      modal.style.display = 'none';
+    }
+  });
+}
+
+function downloadActivityLog() {
+  const activities = localStorage.getItem('activities') || '[]';
+  const blob = new Blob([JSON.stringify(JSON.parse(activities), null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `earl_activity_log_${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // ✅ Console-style boot sequence on load
 function runBootSequence() {
   const bootContainer = document.getElementById('boot-sequence');
   const loader = document.getElementById('loader');
+  const settings = getAiSettings();
+
+  if (!settings.startupAnimation) {
+    loader.classList.add('hidden');
+    return;
+  }
 
   const lines = [
     "[ SYSTEM ONLINE ]",
     "Loading Earl Core v2.4 …",
     "Syncing memory nodes …",
     "Retrieving last session data …",
-    "Hello, Tjay. Neural state: optimal."
+    settings.greetingMessage.replace('{user}', 'Tjay'),
   ];
   let lineIndex = 0;
 
@@ -522,6 +748,8 @@ function runBootSequence() {
 
 // ✅ Self-Reflection Dashboard Logic
 const StatsTracker = {
+  sessionStartTime: null,
+
   logActivity(type, data = {}) {
     const now = new Date();
     // Log session for streak
@@ -540,6 +768,23 @@ const StatsTracker = {
       activities = activities.slice(activities.length - 100);
     }
     localStorage.setItem('activities', JSON.stringify(activities));
+  },
+
+  startSession() {
+    this.sessionStartTime = new Date();
+    this.logActivity('session_start');
+  },
+
+  endSession() {
+    if (!this.sessionStartTime) return;
+    const duration = (new Date() - this.sessionStartTime) / 1000; // in seconds
+    this.logActivity('session_end', { duration });
+    this.sessionStartTime = null;
+  },
+
+  getLearningTimeStats() {
+    // This is a placeholder for a more complex aggregation
+    return { "Mon": 30, "Tue": 45, "Wed": 60, "Thu": 20, "Fri": 75, "Sat": 15, "Sun": 90 };
   },
 
   getStats() {
@@ -617,6 +862,10 @@ function renderDashboard() {
   // Render Charts
   renderChart('activity-hotspot-chart', timeOfDay, 'Activity');
   renderChart('weekly-mode-chart', weeklyModes, 'Usage');
+
+  // Render learning time chart in settings
+  const learningTimeData = StatsTracker.getLearningTimeStats();
+  renderChart('learning-time-chart', learningTimeData, 'Minutes');
 }
 
 function renderChart(elementId, data, labelSuffix) {
@@ -624,12 +873,14 @@ function renderChart(elementId, data, labelSuffix) {
   container.innerHTML = '';
   const total = Object.values(data).reduce((sum, val) => sum + val, 0);
   if (total === 0) {
-    container.innerHTML = `<p class="placeholder-text">Not enough data yet.</p>`;
+    container.innerHTML = `<p class="placeholder-text" style="margin-top: 0;">Not enough data yet.</p>`;
     return;
   }
 
+  const maxVal = Math.max(...Object.values(data));
+
   for (const [label, value] of Object.entries(data)) {
-    const percentage = (value / total) * 100;
+    const percentage = (value / maxVal) * 100;
     const bar = document.createElement('div');
     bar.className = 'chart-bar';
     bar.innerHTML = `
@@ -648,11 +899,14 @@ function renderChart(elementId, data, labelSuffix) {
 
 // ✅ Load on page start
 window.addEventListener("DOMContentLoaded", async () => {
+  // Start tracking session time
+  StatsTracker.startSession();
+
   // Set up the identity layer first
   initializeIdentity();
 
-  // Apply theme based on time
-  applyTimeBasedTheme();
+  // Initialize settings page
+  initializeSettings();
 
   // Run the boot sequence
   runBootSequence();
@@ -660,7 +914,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   // Render the dashboard
   renderDashboard();
 
-  showPage('home'); // Start on the home page dashboard
+  const lastPage = localStorage.getItem('lastVisitedPage') || 'home';
+  showPage(lastPage); // Start on the last visited page or home
   isInitialPageLoad = false;
 
   try {
@@ -669,7 +924,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     history.forEach((msg) => addMessage(msg.sender, msg.text, false)); // Don't use typewriter for history
   } catch (err) {
     console.error("Failed to load chat history:", err);
-    addMessage("E.A.R.L", "⚠️ Couldn't load chat history.", true);
+    addMessage("E.A.R.L", "⚠️ Couldn't load chat history.", getAiSettings().typingAnimation);
   }
 
   loadReminders();
@@ -698,6 +953,11 @@ window.addEventListener("DOMContentLoaded", async () => {
       handleKeyPress(null, action); // For actions without a key, like 'calculate'
     }
   });
+});
+
+// Track session end
+window.addEventListener('beforeunload', () => {
+  StatsTracker.endSession();
 });
 
 // ✅ Keyboard shortcut for chat focus
