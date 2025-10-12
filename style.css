@@ -4,7 +4,7 @@ html {
 
 body {
   font-family: sans-serif;
-  /* Animated Gradient Background */
+  /* Default/Evening Theme */
   background: linear-gradient(-45deg, #0f172a, #1e293b, #3b0764, #23a6d5);
   background-size: 400% 400%;
   animation: gradient-bg 15s ease infinite;
@@ -15,6 +15,21 @@ body {
   justify-content: center;
   align-items: center;
   height: 100%;
+}
+
+/* Time-based Themes */
+body.theme-morning {
+  background: linear-gradient(-45deg, #fde68a, #fca5a5, #818cf8, #60a5fa);
+  background-size: 400% 400%;
+}
+body.theme-evening {
+  /* This is the default theme */
+  background: linear-gradient(-45deg, #0f172a, #1e293b, #3b0764, #23a6d5);
+  background-size: 400% 400%;
+}
+body.theme-night {
+  background: linear-gradient(-45deg, #0c0a09, #1e293b, #4c1d95, #1e40af);
+  background-size: 400% 400%;
 }
 
 .container {
@@ -30,8 +45,34 @@ body {
   display: flex;
   overflow: hidden;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  transition: grid-template-columns 0.3s ease-in-out;
+  position: relative; /* Needed for pseudo-elements */
 }
+
+/* Mood-based Visuals: Research Mode */
+.container.mode-research::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><g fill-rule="evenodd"><g fill="%2338bdf8" fill-opacity="0.1"><path opacity=".5" d="M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z"/></g></g></svg>');
+  z-index: -1; /* Place it behind the content */
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  animation: pulse-circuits 8s ease-in-out infinite;
+}
+
+.container.mode-research::before {
+  opacity: 1;
+}
+
+@keyframes pulse-circuits {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+
 
 @keyframes gradient-bg {
 	0% { background-position: 0% 50%; }
@@ -134,6 +175,17 @@ body {
 
 .sidebar-footer {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.privacy-indicator {
+  font-size: 1.2rem;
+  color: #94a3b8;
+  cursor: help;
 }
 
 .nav-link {
@@ -157,6 +209,35 @@ body {
 .nav-link.active {
   background: #0f172a;
   color: #38bdf8;
+}
+
+/* --- Identity Layer --- */
+.identity-layer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: rgba(15, 23, 42, 0.5);
+  border-bottom: 1px solid #334155;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.mode-selector, .energy-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#mode-select {
+  background: #334155;
+  color: #f8fafc;
+  border: none;
+  border-radius: 5px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 
 /* --- Main Content & Pages --- */
@@ -222,6 +303,71 @@ main.main-content {
 
 .dashboard-card h3 { margin: 0 0 0.5rem 0; font-size: 1.3rem; color: #f8fafc; }
 .dashboard-card p { margin: 0; color: #cbd5e1; }
+
+.placeholder-text {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 1.1rem;
+  margin-top: 2rem;
+}
+
+/* --- Reflection Dashboard --- */
+.reflection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.reflection-card {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  border-radius: 10px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.reflection-card.focus-card {
+  background: rgba(56, 189, 248, 0.2); /* Highlight color */
+  grid-column: 1 / -1; /* Make it span full width on larger screens */
+}
+
+.reflection-card h3 { margin: 0 0 1rem 0; font-size: 1.1rem; color: #cbd5e1; border-bottom: 1px solid #475569; padding-bottom: 0.5rem; }
+.reflection-card p { margin: 0; color: #cbd5e1; }
+
+.streak-container { text-align: center; margin: auto; }
+.streak-count {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #f8fafc;
+  line-height: 1;
+  text-shadow: 0 0 15px #38bdf8;
+}
+
+.chart-container { display: flex; flex-direction: column; gap: 0.75rem; }
+.chart-bar { display: flex; align-items: center; gap: 0.5rem; }
+.chart-label { flex-basis: 80px; font-size: 0.9rem; color: #94a3b8; }
+.chart-progress-wrapper { flex-grow: 1; background: #1e293b; border-radius: 4px; overflow: hidden; }
+.chart-progress {
+  height: 18px;
+  background: #38bdf8;
+  width: 0%; /* Set by JS */
+  transition: width 0.5s ease-out;
+  box-shadow: 0 0 8px #38bdf8;
+}
+
+/* --- Original Dashboard Grid (now unused but kept for reference) --- */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 900px;
+  padding: 1rem;
+}
 
 .placeholder-text {
   text-align: center;

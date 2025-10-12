@@ -16,6 +16,11 @@ const navLinks = document.querySelectorAll(".nav-link");
 const pages = document.querySelectorAll(".page");
 const dashboardCards = document.querySelectorAll(".dashboard-card");
 const navSound = document.getElementById("nav-sound");
+const modeSelect = document.getElementById("mode-select");
+const modeIcon = document.getElementById("mode-indicator-icon");
+const appContainer = document.getElementById("app-container");
+const energyLevel = document.getElementById("energy-level");
+
 
 let isInitialPageLoad = true;
 
@@ -160,6 +165,7 @@ chatForm.addEventListener("submit", async (e) => {
   if (!message) return;
 
   addMessage("You", message, false);
+  StatsTracker.logActivity('chat'); // Log chat activity
   chatInput.value = "";
 
   showTypingIndicator();
@@ -191,6 +197,7 @@ reminderForm.addEventListener("submit", async (e) => {
   const text = reminderInput.value.trim();
   if (!text) return;
 
+  StatsTracker.logActivity('reminder'); // Log reminder activity
   try {
     const res = await fetch(`${BASE_URL}/reminders`, {
       method: "POST",
@@ -434,14 +441,63 @@ function handleKeyPress(key, type) {
   updateDisplay();
 }
 
+// ✅ Dynamic Identity Layer Logic
+const modes = {
+  focus: { icon: '🟢', greeting: "You're in Focus Mode. Let's get things done." },
+  creative: { icon: '🟣', greeting: "You're in Creative Mode. Ready to brainstorm new concepts?" },
+  research: { icon: '🔵', greeting: "You're in Research Mode. Let's uncover some new information." },
+  relax: { icon: '⚪', greeting: "You're in Relax Mode. Time to wind down." },
+};
+
+function applyTimeBasedTheme() {
+  const hour = new Date().getHours();
+  const body = document.body;
+  body.classList.remove('theme-morning', 'theme-evening', 'theme-night');
+
+  if (hour >= 6 && hour < 17) { // 6am to 5pm
+    body.classList.add('theme-morning');
+  } else if (hour >= 22 || hour < 6) { // 10pm to 6am
+    body.classList.add('theme-night');
+  } else { // 5pm to 10pm
+    body.classList.add('theme-evening');
+  }
+}
+
+function updateUserMode(mode) {
+  localStorage.setItem('userMode', mode);
+  modeSelect.value = mode;
+  StatsTracker.logActivity('mode', { mode }); // Log mode change
+  modeIcon.textContent = modes[mode].icon;
+
+  // Apply mode-based classes for visuals
+  appContainer.classList.remove('mode-focus', 'mode-creative', 'mode-research', 'mode-relax');
+  appContainer.classList.add(`mode-${mode}`);
+}
+
+function initializeIdentity() {
+  const savedMode = localStorage.getItem('userMode') || 'focus';
+  updateUserMode(savedMode);
+
+  // Set a random energy level on load
+  const randomEnergy = Math.floor(Math.random() * (95 - 75 + 1)) + 75;
+  energyLevel.textContent = `${randomEnergy}%`;
+
+  modeSelect.addEventListener('change', (e) => {
+    updateUserMode(e.target.value);
+  });
+}
+
 // ✅ Console-style boot sequence on load
 function runBootSequence() {
   const bootContainer = document.getElementById('boot-sequence');
   const loader = document.getElementById('loader');
+
   const lines = [
-    "Initializing Earl.AI...",
-    "Loading memory modules...",
-    "Welcome back, Tjay."
+    "[ SYSTEM ONLINE ]",
+    "Loading Earl Core v2.4 …",
+    "Syncing memory nodes …",
+    "Retrieving last session data …",
+    "Hello, Tjay. Neural state: optimal."
   ];
   let lineIndex = 0;
 
@@ -464,10 +520,145 @@ function runBootSequence() {
   typeLine();
 }
 
+// ✅ Self-Reflection Dashboard Logic
+const StatsTracker = {
+  logActivity(type, data = {}) {
+    const now = new Date();
+    // Log session for streak
+    const today = now.toISOString().split('T')[0];
+    let sessions = JSON.parse(localStorage.getItem('sessions')) || [];
+    if (!sessions.includes(today)) {
+      sessions.push(today);
+      localStorage.setItem('sessions', JSON.stringify(sessions));
+    }
+
+    // Log specific activity with timestamp
+    let activities = JSON.parse(localStorage.getItem('activities')) || [];
+    activities.push({ type, timestamp: now.toISOString(), ...data });
+    // Keep last 100 activities to prevent localStorage bloat
+    if (activities.length > 100) {
+      activities = activities.slice(activities.length - 100);
+    }
+    localStorage.setItem('activities', JSON.stringify(activities));
+  },
+
+  getStats() {
+    const activities = JSON.parse(localStorage.getItem('activities')) || [];
+    const sessions = JSON.parse(localStorage.getItem('sessions')) || [];
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    // 1. Activity Hotspot
+    const timeOfDay = { Morning: 0, Afternoon: 0, Evening: 0 };
+    activities.forEach(act => {
+      const hour = new Date(act.timestamp).getHours();
+      if (hour >= 6 && hour < 12) timeOfDay.Morning++;
+      else if (hour >= 12 && hour < 18) timeOfDay.Afternoon++;
+      else timeOfDay.Evening++;
+    });
+
+    // 2. Weekly Mode Usage
+    const weeklyModes = { focus: 0, creative: 0, research: 0, relax: 0 };
+    activities.filter(act => act.type === 'mode' && new Date(act.timestamp) > oneWeekAgo)
+      .forEach(act => {
+        if (weeklyModes.hasOwnProperty(act.mode)) {
+          weeklyModes[act.mode]++;
+        }
+      });
+
+    // 3. Learning Streak
+    let streak = 0;
+    if (sessions.length > 0) {
+      sessions.sort().reverse(); // Sort dates descending
+      streak = 1;
+      const today = new Date(sessions[0]);
+      if (new Date().toISOString().split('T')[0] !== sessions[0]) {
+        // If the last session wasn't today, the streak is 0
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (yesterday.toISOString().split('T')[0] === sessions[0]) {
+           // last session was yesterday, so continue from there
+        } else {
+          streak = 0;
+        }
+      }
+
+      if (streak > 0) {
+        for (let i = 0; i < sessions.length - 1; i++) {
+          const currentDay = new Date(sessions[i]);
+          const previousDay = new Date(sessions[i+1]);
+          const diffTime = currentDay - previousDay;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          if (diffDays === 1) {
+            streak++;
+          } else {
+            break; // Streak is broken
+          }
+        }
+      }
+    }
+
+    // 4. Today's Focus (simple implementation)
+    const lastChat = activities.filter(a => a.type === 'chat').pop();
+    const focus = lastChat ? `Revisiting your last topic: "${lastChat.message.substring(0, 40)}..."` : "Start a conversation to define your focus.";
+
+    return { timeOfDay, weeklyModes, streak, focus };
+  },
+};
+
+function renderDashboard() {
+  const { timeOfDay, weeklyModes, streak, focus } = StatsTracker.getStats();
+
+  // Render Focus
+  document.getElementById('today-focus-card').textContent = focus;
+
+  // Render Streak
+  document.getElementById('learning-streak-count').textContent = streak;
+
+  // Render Charts
+  renderChart('activity-hotspot-chart', timeOfDay, 'Activity');
+  renderChart('weekly-mode-chart', weeklyModes, 'Usage');
+}
+
+function renderChart(elementId, data, labelSuffix) {
+  const container = document.getElementById(elementId);
+  container.innerHTML = '';
+  const total = Object.values(data).reduce((sum, val) => sum + val, 0);
+  if (total === 0) {
+    container.innerHTML = `<p class="placeholder-text">Not enough data yet.</p>`;
+    return;
+  }
+
+  for (const [label, value] of Object.entries(data)) {
+    const percentage = (value / total) * 100;
+    const bar = document.createElement('div');
+    bar.className = 'chart-bar';
+    bar.innerHTML = `
+      <div class="chart-label">${label}</div>
+      <div class="chart-progress-wrapper">
+        <div class="chart-progress" style="width: 0%;"></div>
+      </div>
+    `;
+    container.appendChild(bar);
+    // Animate the bar width after it's added to the DOM
+    setTimeout(() => {
+      bar.querySelector('.chart-progress').style.width = `${percentage}%`;
+    }, 100);
+  }
+}
+
 // ✅ Load on page start
 window.addEventListener("DOMContentLoaded", async () => {
+  // Set up the identity layer first
+  initializeIdentity();
+
+  // Apply theme based on time
+  applyTimeBasedTheme();
+
   // Run the boot sequence
   runBootSequence();
+
+  // Render the dashboard
+  renderDashboard();
 
   showPage('home'); // Start on the home page dashboard
   isInitialPageLoad = false;

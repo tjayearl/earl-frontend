@@ -23,19 +23,47 @@
         <li><a href="#" class="nav-link" data-page="calculator" title="Calculator">🧮</a></li>
       </ul>
       <div class="sidebar-footer">
+        <div class="privacy-indicator" title="All reflection data is stored locally. No cloud connections are used for your personal stats.">🧩</div>
         <a href="#" class="nav-link" data-page="settings" title="Settings">⚙️</a>
       </div>
     </nav>
 
     <main class="main-content">
+      <div class="identity-layer">
+        <div class="mode-selector">
+          <span id="mode-indicator-icon">🟢</span>
+          <span>Mode:</span>
+          <select id="mode-select">
+            <option value="focus">Focus</option>
+            <option value="creative">Creative</option>
+            <option value="research">Research</option>
+            <option value="relax">Relax</option>
+          </select>
+        </div>
+        <div id="energy-indicator" class="energy-indicator">⚡ Energy: <span id="energy-level">...</span></div>
+      </div>
       <section id="home" class="page">
-        <div class="dashboard-grid">
-          <div class="dashboard-card" data-page="chat">
-            <h3>Chat</h3><p>Talk with E.A.R.L</p></div>
-          <div class="dashboard-card" data-page="reminders">
-            <h3>Reminders</h3><p>Manage your tasks</p></div>
-          <div class="dashboard-card" data-page="calculator">
-            <h3>Calculator</h3><p>For complex calculations</p></div>
+        <div class="section-header"><h2>Self-Reflection Dashboard</h2></div>
+        <div class="reflection-grid">
+          <div class="reflection-card focus-card">
+            <h3>Today's Focus</h3>
+            <p id="today-focus-card">Analyzing your recent activity...</p>
+          </div>
+          <div class="reflection-card">
+            <h3>Activity Hotspot</h3>
+            <div id="activity-hotspot-chart" class="chart-container"></div>
+          </div>
+          <div class="reflection-card">
+            <h3>Weekly Mode</h3>
+            <div id="weekly-mode-chart" class="chart-container"></div>
+          </div>
+          <div class="reflection-card">
+            <h3>Learning Streak</h3>
+            <div class="streak-container">
+              <span id="learning-streak-count" class="streak-count">0</span>
+              <p>Days in a row</p>
+            </div>
+          </div>
         </div>
         </section>
 
