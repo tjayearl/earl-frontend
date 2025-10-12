@@ -13,16 +13,23 @@
       <p>Booting up...</p>
     </div>
   </div>
-  <div class="container">
-    <nav>
-      <a href="#" class="nav-link active" data-page="home">Home</a>
-      <a href="#" class="nav-link" data-page="chat">Chat</a>
-      <a href="#" class="nav-link" data-page="reminders">Reminders</a>
-      <a href="#" class="nav-link" data-page="calculator">Calculator</a>
+  <div class="container" id="app-container">
+    <nav class="sidebar-nav">
+      <div class="sidebar-logo">E</div>
+      <ul>
+        <li><a href="#" class="nav-link active" data-page="home" title="Home">🏠</a></li>
+        <li><a href="#" class="nav-link" data-page="chat" title="Chat">💬</a></li>
+        <li><a href="#" class="nav-link" data-page="reminders" title="Tasks">✔️</a></li>
+        <li><a href="#" class="nav-link" data-page="notes" title="Notes">📝</a></li>
+        <li><a href="#" class="nav-link" data-page="calculator" title="Calculator">🧮</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <a href="#" class="nav-link" data-page="settings" title="Settings">⚙️</a>
+      </div>
     </nav>
 
-    <main>
-      <section id="home" class="page active">
+    <main class="main-content">
+      <section id="home" class="page">
         <div class="dashboard-grid">
           <div class="dashboard-card" data-page="chat">
             <h3>Chat</h3><p>Talk with E.A.R.L</p></div>
@@ -31,11 +38,16 @@
           <div class="dashboard-card" data-page="calculator">
             <h3>Calculator</h3><p>For complex calculations</p></div>
         </div>
-      </section>
+        </section>
 
       <section id="chat" class="page">
         <div class="section-header">
-          <h2>Chat with E.A.R.L</h2>
+          <div class="header-left">
+            <h2>Chat with E.A.R.L</h2>
+            <div class="chat-tag-wrapper">
+              <input type="text" id="chat-tag-input" placeholder="Add a tag..." />
+            </div>
+          </div>
           <button id="clear-chat-btn" class="btn-secondary">Clear Chat</button>
         </div>
         <div id="chat-box"></div>
@@ -46,7 +58,7 @@
           </div>
           <button type="submit" class="btn-primary">Send</button>
         </form>
-      </section>
+        </section>
 
       <section id="reminders" class="page">
         <div class="section-header">
@@ -58,7 +70,7 @@
           <input type="text" id="reminder-input" placeholder="Add a reminder..." required />
           <button type="submit">Add</button>
         </form>
-      </section>
+        </section>
 
       <section id="calculator" class="page">
         <div class="calculator-grid">
@@ -95,6 +107,17 @@
           </div>
         </div>
       </section>
+
+      <section id="notes" class="page">
+        <div class="section-header"><h2>Notes</h2></div>
+        <p class="placeholder-text">The "Notes" feature is coming soon!</p>
+      </section>
+
+      <section id="settings" class="page">
+        <div class="section-header"><h2>Settings</h2></div>
+        <p class="placeholder-text">The "Settings" page is coming soon!</p>
+      </section>
+
     </main>
   </div>
 

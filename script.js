@@ -70,20 +70,44 @@ function typewriter(element, text, onComplete) {
 
 // ✅ Adds message to chat UI
 function addMessage(sender, text, useTypewriter = false) {
+  const wrapper = document.createElement("div");
+  wrapper.classList.add("message-wrapper");
+
+  const content = document.createElement("div");
+  content.classList.add("message-content");
+
   const messageDiv = document.createElement("div");
   messageDiv.classList.add("message");
 
-  const senderClass = sender === "You" ? "user-message" : "earl-message";
-  messageDiv.classList.add(senderClass);
+  if (sender === "You") {
+    wrapper.classList.add("user-message-wrapper");
+    messageDiv.classList.add("user-message");
+  } else {
+    wrapper.classList.add("earl-message-wrapper");
+    messageDiv.classList.add("earl-message");
 
-  chatBox.appendChild(messageDiv);
+    const avatar = document.createElement("div");
+    avatar.classList.add("avatar");
+    avatar.textContent = "E"; // E.A.R.L's initial
+    wrapper.appendChild(avatar);
+  }
 
   const p = document.createElement("p");
   messageDiv.appendChild(p);
+  content.appendChild(messageDiv);
+
+  const timestamp = document.createElement("div");
+  timestamp.classList.add("timestamp");
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  timestamp.textContent = time;
+  content.appendChild(timestamp);
+
+  wrapper.appendChild(content);
+  chatBox.appendChild(wrapper);
 
   if (sender === "E.A.R.L" && useTypewriter) {
     messageDiv.classList.add("animate-pulse");
-    typewriter(p, text, () => { /* Animation on complete if needed */ });
+    typewriter(p, text, () => { chatBox.scrollTop = chatBox.scrollHeight; });
   } else {
     p.textContent = text;
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -92,11 +116,20 @@ function addMessage(sender, text, useTypewriter = false) {
 
 // ✅ Shows a "typing..." indicator
 function showTypingIndicator() {
-  const messageDiv = document.createElement("div");
-  messageDiv.classList.add("message", "earl-message", "typing-indicator");
-  // Simple animated dots
-  messageDiv.innerHTML = `<p><span>.</span><span>.</span><span>.</span></p>`;
-  chatBox.appendChild(messageDiv);
+  const wrapper = document.createElement("div");
+  wrapper.classList.add("message-wrapper", "earl-message-wrapper", "typing-indicator");
+
+  const avatar = document.createElement("div");
+  avatar.classList.add("avatar");
+  avatar.textContent = "E";
+  wrapper.appendChild(avatar);
+
+  const content = document.createElement("div");
+  content.classList.add("message-content");
+  content.innerHTML = `<div class="message earl-message"><p><span>.</span><span>.</span><span>.</span></p></div>`;
+  wrapper.appendChild(content);
+
+  chatBox.appendChild(wrapper);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
@@ -396,6 +429,9 @@ window.addEventListener("DOMContentLoaded", async () => {
   setTimeout(() => {
     loader.classList.add('hidden');
   }, 500); // Adjust delay as needed
+
+  showPage('home'); // Start on the home page dashboard
+
   try {
     const res = await fetch(`${BASE_URL}/chat/history`);
     const history = await res.json();
@@ -431,4 +467,14 @@ window.addEventListener("DOMContentLoaded", async () => {
       handleKeyPress(null, action); // For actions without a key, like 'calculate'
     }
   });
+});
+
+// ✅ Keyboard shortcut for chat focus
+window.addEventListener('keydown', (e) => {
+  // If we're pressing "/" and not in an input field already
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault(); // Prevent typing "/" in the input
+    showPage('chat'); // Switch to chat page if not already there
+    chatInput.focus();
+  }
 });
