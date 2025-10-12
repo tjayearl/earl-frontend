@@ -503,6 +503,19 @@ input {
   filter: brightness(1.2);
 }
 
+/* Danger button style */
+.btn-danger {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: #ef4444; /* Red color */
+  color: #f8fafc;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.btn-danger:hover { background-color: #f87171; }
+
 #chat-box {
   flex-grow: 1;
   overflow-y: auto;
@@ -820,6 +833,31 @@ ul#reminder-list li:hover .reminder-check::after {
 
 }
 
+/* --- Core Identity Card --- */
+.core-identity-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent-color);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--glow-color) 50%, transparent);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+  font-family: var(--font-mono);
+}
+.core-identity-card h3 {
+  color: var(--accent-color) !important;
+  margin-top: 0;
+}
+.identity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1.5rem;
+}
+.identity-grid p { margin: 0; color: var(--text-secondary); }
+.identity-grid .full-width {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+}
+
 /* --- Settings Page Styles --- */
 .settings-container {
   padding: 1rem;
@@ -948,10 +986,36 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 5px;
 }
 
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .sub-setting-group label {
   display: flex; align-items: center; gap: 0.75rem; font-weight: normal; color: var(--text-secondary);
 }
 /* Toggle Switch */
+.sandbox-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.sandbox-output {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem;
+  border-radius: 5px;
+  margin-top: 0.75rem;
+  min-height: 50px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
 .toggle-switch {
   position: relative;
   display: inline-block;

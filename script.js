@@ -177,6 +177,11 @@ chatForm.addEventListener("submit", async (e) => {
     // Get the latest AI settings
     const settings = getAiSettings();
 
+    if (settings.offlineMode) {
+      addMessage("E.A.R.L", "Offline mode is active. Cannot connect to the AI brain.", true);
+      return;
+    }
+
     const res = await fetch(`${BASE_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -204,6 +209,11 @@ reminderForm.addEventListener("submit", async (e) => {
   const text = reminderInput.value.trim();
   if (!text) return;
 
+  if (getAiSettings().offlineMode) {
+    alert("Offline mode is active. Cannot save reminders.");
+    return;
+  }
+
   StatsTracker.logActivity('reminder'); // Log reminder activity
   try {
     const res = await fetch(`${BASE_URL}/reminders`, {
@@ -226,6 +236,10 @@ reminderForm.addEventListener("submit", async (e) => {
 
 // ✅ Load all reminders
 async function loadReminders() {
+  if (getAiSettings().offlineMode) {
+    reminderList.innerHTML = "<li>Offline mode is active.</li>";
+    return;
+  }
   try {
     const res = await fetch(`${BASE_URL}/reminders`);
     const reminders = await res.json();
@@ -254,6 +268,10 @@ async function deleteReminder(id) {
   if (!confirm("Are you sure you want to delete this reminder?")) {
     return;
   }
+  if (getAiSettings().offlineMode) {
+    alert("Offline mode is active. Cannot delete reminders.");
+    return;
+  }
   try {
     const res = await fetch(`${BASE_URL}/reminders/${id}`, {
       method: "DELETE",
@@ -271,6 +289,10 @@ async function deleteReminder(id) {
 // ✅ Clear all reminders
 async function clearAllReminders() {
   if (!confirm("Are you sure you want to delete ALL reminders? This cannot be undone.")) {
+    return;
+  }
+  if (getAiSettings().offlineMode) {
+    alert("Offline mode is active. Cannot clear reminders.");
     return;
   }
 
@@ -293,6 +315,11 @@ async function clearAllReminders() {
 // ✅ Clear chat history
 async function clearChat() {
   if (!confirm("Are you sure you want to clear the entire chat history? This cannot be undone.")) {
+    return;
+  }
+  if (getAiSettings().offlineMode) {
+    chatBox.innerHTML = "";
+    addMessage("E.A.R.L", "Chat history cleared locally (Offline Mode).", true);
     return;
   }
 
@@ -466,6 +493,20 @@ const defaultAiSettings = {
   greetingMessage: "Hello, {user}. Neural state: optimal.",
   systemSounds: true,
   typingAnimation: true,
+  // Privacy settings
+  offlineMode: false,
+  encryption: false,
+  // Learning & Focus settings
+  focusGoal: 60,
+  focusReminders: false,
+  studyTopic: '',
+  motivationalBoosts: true,
+  // Voice & Input settings
+  voiceInput: true,
+  voiceOutput: 'text',
+  speechStyle: 'calm',
+  // Developer settings
+  devShortcut: false,
 };
 
 function getAiSettings() {
@@ -510,6 +551,34 @@ function initializeSettings() {
   const greetingInput = document.getElementById('greeting-message-input');
   const soundsToggle = document.getElementById('system-sounds-toggle');
   const typingToggle = document.getElementById('typing-animation-toggle');
+  const offlineToggle = document.getElementById('offline-mode-toggle');
+  const encryptionToggle = document.getElementById('encryption-toggle');
+  const clearDataBtn = document.getElementById('clear-all-data-btn');
+  const focusGoalInput = document.getElementById('focus-goal-input');
+  const focusRemindersToggle = document.getElementById('focus-reminders-toggle');
+  const studyTopicInput = document.getElementById('study-topic-input');
+  const motivationalBoostsToggle = document.getElementById('motivational-boosts-toggle');
+  const voiceInputToggle = document.getElementById('voice-input-toggle');
+  const voiceOutputGroup = document.getElementById('voice-output-group');
+  const speechStyleGroup = document.getElementById('speech-style-group');
+  const showLogsBtn = document.getElementById('show-logs-btn');
+  const inspectMemoryBtn = document.getElementById('inspect-memory-btn');
+  const devShortcutToggle = document.getElementById('dev-shortcut-toggle');
+  const runSandboxBtn = document.getElementById('run-sandbox-btn');
+
+  // --- Core Identity ---
+  const lastRebootSpan = document.getElementById('core-last-reboot');
+  const lastRebootTime = new Date(StatsTracker.sessionStartTime);
+  const now = new Date();
+  const diffHours = Math.floor((now - lastRebootTime) / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays > 0) {
+    lastRebootSpan.textContent = `${diffDays} day(s) ago`;
+  } else if (diffHours > 0) {
+    lastRebootSpan.textContent = `${diffHours} hour(s) ago`;
+  } else {
+    lastRebootSpan.textContent = "Just now";
+  }
 
 
   // Add event listeners to save changes
@@ -564,12 +633,16 @@ function initializeSettings() {
 
   document.getElementById('download-log-btn').addEventListener('click', downloadActivityLog);
   initializeModal();
+  clearDataBtn.addEventListener('click', clearAllData);
 
   // --- UX Settings Listeners ---
   startupToggle.checked = settings.startupAnimation;
   greetingInput.value = settings.greetingMessage;
   soundsToggle.checked = settings.systemSounds;
   typingToggle.checked = settings.typingAnimation;
+
+  offlineToggle.checked = settings.offlineMode;
+  encryptionToggle.checked = settings.encryption;
 
   startupToggle.addEventListener('change', (e) => {
     settings.startupAnimation = e.target.checked;
@@ -586,6 +659,71 @@ function initializeSettings() {
   typingToggle.addEventListener('change', (e) => {
     settings.typingAnimation = e.target.checked;
     saveAiSettings(settings);
+  });
+  offlineToggle.addEventListener('change', (e) => {
+    settings.offlineMode = e.target.checked;
+    saveAiSettings(settings);
+  });
+  encryptionToggle.addEventListener('change', (e) => {
+    settings.encryption = e.target.checked;
+    saveAiSettings(settings);
+  });
+
+  // --- Learning & Focus Listeners ---
+  focusGoalInput.value = settings.focusGoal;
+  focusRemindersToggle.checked = settings.focusReminders;
+  studyTopicInput.value = settings.studyTopic;
+  motivationalBoostsToggle.checked = settings.motivationalBoosts;
+
+  focusGoalInput.addEventListener('change', (e) => {
+    settings.focusGoal = parseInt(e.target.value, 10) || 0;
+    saveAiSettings(settings);
+  });
+  focusRemindersToggle.addEventListener('change', (e) => {
+    settings.focusReminders = e.target.checked;
+    saveAiSettings(settings);
+  });
+  studyTopicInput.addEventListener('change', (e) => {
+    settings.studyTopic = e.target.value;
+    saveAiSettings(settings);
+  });
+  motivationalBoostsToggle.addEventListener('change', (e) => {
+    settings.motivationalBoosts = e.target.checked;
+    saveAiSettings(settings);
+  });
+
+  // --- Voice & Input Listeners ---
+  voiceInputToggle.checked = settings.voiceInput;
+  document.querySelector(`input[name="voice-output"][value="${settings.voiceOutput}"]`).checked = true;
+  document.querySelector(`input[name="speech-style"][value="${settings.speechStyle}"]`).checked = true;
+  applyVoiceSettings(settings); // Apply mic visibility on load
+
+  voiceInputToggle.addEventListener('change', (e) => {
+    settings.voiceInput = e.target.checked;
+    saveAiSettings(settings);
+    applyVoiceSettings(settings);
+  });
+  voiceOutputGroup.addEventListener('change', (e) => {
+    settings.voiceOutput = e.target.value;
+    saveAiSettings(settings);
+  });
+  speechStyleGroup.addEventListener('change', (e) => {
+    settings.speechStyle = e.target.value;
+    saveAiSettings(settings);
+  });
+
+  // --- Developer Listeners ---
+  devShortcutToggle.checked = settings.devShortcut;
+  showLogsBtn.addEventListener('click', showSystemLogs);
+  inspectMemoryBtn.addEventListener('click', inspectAiMemory);
+  runSandboxBtn.addEventListener('click', runSandbox);
+
+  devShortcutToggle.addEventListener('change', (e) => {
+    settings.devShortcut = e.target.checked;
+    saveAiSettings(settings);
+    if (e.target.checked) {
+      console.log("Developer shortcut (Ctrl+Shift+D) enabled.");
+    }
   });
 }
 
@@ -627,6 +765,13 @@ function applyThemeSettings(settings) {
   document.getElementById('font-select').value = settings.font;
 }
 
+function applyVoiceSettings(settings) {
+  const micIcon = document.getElementById('mic-icon');
+  if (micIcon) {
+    micIcon.style.display = settings.voiceInput ? 'block' : 'none';
+  }
+}
+
 function applyTimeBasedTheme() {
   const hour = new Date().getHours();
   const body = document.body;
@@ -665,6 +810,56 @@ function initializeIdentity() {
   });
 }
 
+function showSystemLogs() {
+  const activities = JSON.parse(localStorage.getItem('activities')) || [];
+  const formattedLogs = activities.reverse().map(log =>
+    `${new Date(log.timestamp).toLocaleString()}: ${log.type} - ${JSON.stringify(log)}`
+  ).join('\n');
+  showModal("System Logs", formattedLogs);
+}
+
+function inspectAiMemory() {
+  const settings = getAiSettings();
+  const formattedMemory = JSON.stringify(settings, null, 2);
+  showModal("AI Memory (Settings)", formattedMemory);
+}
+
+function runSandbox() {
+  const input = document.getElementById('sandbox-input').value;
+  const mode = document.querySelector('input[name="sandbox-mode"]:checked').value;
+  const outputEl = document.getElementById('sandbox-output');
+
+  if (!input) {
+    outputEl.textContent = "Sandbox input is empty.";
+    return;
+  }
+
+  if (mode === 'js') {
+    outputEl.textContent = "Running JS...\n\n";
+    try {
+      // DANGER: eval is powerful and can be unsafe. Use with caution.
+      const result = eval(input);
+      outputEl.textContent += `Result: ${JSON.stringify(result, null, 2)}`;
+    } catch (error) {
+      outputEl.textContent += `Error: ${error.message}`;
+    }
+  } else if (mode === 'ai') {
+    outputEl.textContent = "Sending prompt to AI...";
+    // Simulate sending a prompt, we can just add it to the main chat UI
+    addMessage("You", `[Sandbox Prompt] ${input}`, false);
+    chatInput.value = input; // Put it in the main input
+    chatForm.dispatchEvent(new Event('submit')); // Trigger a submit
+    outputEl.textContent = "Sandbox prompt sent to main chat.";
+  }
+}
+
+function showModal(title, content) {
+  const modal = document.getElementById('sessions-modal');
+  modal.querySelector('h3').textContent = title;
+  modal.querySelector('pre').textContent = content;
+  modal.style.display = 'block';
+}
+
 // ✅ Modal Logic
 function initializeModal() {
   const modal = document.getElementById('sessions-modal');
@@ -672,15 +867,9 @@ function initializeModal() {
   const closeBtn = modal.querySelector('.modal-close');
 
   viewBtn.addEventListener('click', () => {
-    const sessions = JSON.parse(localStorage.getItem('sessions')) || [];
-    const lastFive = sessions.slice(-5).reverse(); // Newest first
-    const logContent = document.getElementById('sessions-log-content');
-    if (lastFive.length > 0) {
-      logContent.textContent = lastFive.map((s, i) => `Session ${i+1}: ${new Date(s).toLocaleString()}`).join('\n');
-    } else {
-      logContent.textContent = "No session data recorded yet.";
-    }
-    modal.style.display = 'block';
+    const sessions = (JSON.parse(localStorage.getItem('sessions')) || []).slice(-5).reverse();
+    const content = sessions.length > 0 ? sessions.map((s, i) => `Session ${i+1}: ${new Date(s).toLocaleString()}`).join('\n') : "No session data recorded yet.";
+    showModal("Last 5 Sessions", content);
   });
 
   closeBtn.addEventListener('click', () => {
@@ -707,6 +896,14 @@ function downloadActivityLog() {
   URL.revokeObjectURL(url);
 }
 
+function clearAllData() {
+  if (confirm("DANGER: This will permanently delete ALL local data, including settings, stats, and logs. Are you absolutely sure?")) {
+    localStorage.clear();
+    alert("All data has been cleared. The application will now reload.");
+    location.reload();
+  }
+}
+
 // ✅ Console-style boot sequence on load
 function runBootSequence() {
   const bootContainer = document.getElementById('boot-sequence');
@@ -718,13 +915,19 @@ function runBootSequence() {
     return;
   }
 
-  const lines = [
+  let lines = [
     "[ SYSTEM ONLINE ]",
     "Loading Earl Core v2.4 …",
     "Syncing memory nodes …",
     "Retrieving last session data …",
-    settings.greetingMessage.replace('{user}', 'Tjay'),
   ];
+
+  if (settings.studyTopic) {
+    lines.push(`Continuing your research in ${settings.studyTopic}.`);
+  }
+
+  lines.push(settings.greetingMessage.replace('{user}', 'Tjay'));
+
   let lineIndex = 0;
 
   function typeLine() {
@@ -918,6 +1121,11 @@ window.addEventListener("DOMContentLoaded", async () => {
   showPage(lastPage); // Start on the last visited page or home
   isInitialPageLoad = false;
 
+  if (getAiSettings().offlineMode) {
+    chatBox.innerHTML = "";
+    addMessage("E.A.R.L", "Offline mode is active. Chat history is not available.", true);
+    loadReminders(); // This will show the offline message for reminders
+  } else {
   try {
     const res = await fetch(`${BASE_URL}/chat/history`);
     const history = await res.json();
@@ -928,6 +1136,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   loadReminders();
+  }
 
   // ✅ Wire up clear buttons
   clearChatBtn.addEventListener("click", clearChat);
@@ -967,5 +1176,14 @@ window.addEventListener('keydown', (e) => {
     e.preventDefault(); // Prevent typing "/" in the input
     showPage('chat'); // Switch to chat page if not already there
     chatInput.focus();
+  }
+
+  // Developer shortcut
+  if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+    if (getAiSettings().devShortcut) {
+      e.preventDefault();
+      console.log("--- DEVELOPER MODE TRIGGERED ---");
+      console.log("Current Settings:", getAiSettings());
+    }
   }
 });

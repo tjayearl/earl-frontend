@@ -143,7 +143,17 @@
       <section id="settings" class="page">
         <div class="section-header"><h2>Settings</h2></div>
         <div class="settings-container">
-          <h3>AI Personality & Behavior</h3>
+          <div class="core-identity-card">
+            <h3>Earl Core Identity</h3>
+            <div class="identity-grid">
+              <p><strong>Version:</strong> <span id="core-version">v2.4.1</span></p>
+              <p><strong>Codename:</strong> <span id="core-codename">Archon</span></p>
+              <p><strong>Status:</strong> <span id="core-status">99% Operational</span></p>
+              <p><strong>Last Reboot:</strong> <span id="core-last-reboot">...</span></p>
+              <p class="full-width"><strong>Primary Objective:</strong> <span id="core-objective">Support Tjay’s intellectual growth.</span></p>
+            </div>
+          </div>
+          <h3 class="settings-divider">AI Personality & Behavior</h3>
 
           <div class="setting-group">
             <label>AI Tone</label>
@@ -257,6 +267,101 @@
           <div class="setting-group">
             <label>Typing Animation</label>
             <label class="toggle-switch"><input type="checkbox" id="typing-animation-toggle"><span class="toggle-slider"></span> Enable typewriter effect</label>
+          </div>
+
+          <h3 class="settings-divider">Privacy & Security</h3>
+
+          <div class="setting-group">
+            <label>Offline Mode</label>
+            <label class="toggle-switch"><input type="checkbox" id="offline-mode-toggle"><span class="toggle-slider"></span> Disable all network requests</label>
+          </div>
+
+          <div class="setting-group">
+            <label>AI Core Encryption</label>
+            <label class="toggle-switch"><input type="checkbox" id="encryption-toggle"><span class="toggle-slider"></span> Visual effect only</label>
+          </div>
+
+          <div class="setting-group">
+            <label>Clear All Local Data</label>
+            <p class="text-muted" style="margin-bottom: 1rem;">This will permanently delete all settings, stats, and logs stored in your browser.</p>
+            <button id="clear-all-data-btn" class="btn-danger">Clear All Data</button>
+          </div>
+
+          <h3 class="settings-divider">Learning & Focus Configuration</h3>
+
+          <div class="setting-group">
+            <label>Focus Timer Settings</label>
+            <div class="input-group">
+              <input type="number" id="focus-goal-input" class="settings-input" min="0" placeholder="e.g., 60">
+              <label for="focus-goal-input">Daily goal (minutes)</label>
+            </div>
+            <div class="sub-setting-group" style="margin-top: 1rem;">
+              <label class="toggle-switch"><input type="checkbox" id="focus-reminders-toggle"><span class="toggle-slider"></span> Enable focus reminders</label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label for="study-topic-input">Current Study Topic</label>
+            <input type="text" id="study-topic-input" class="settings-input" placeholder="e.g., Neural Networks">
+          </div>
+
+          <div class="setting-group">
+            <label>Motivational Boosts</label>
+            <label class="toggle-switch"><input type="checkbox" id="motivational-boosts-toggle"><span class="toggle-slider"></span> Show daily affirmations/quotes</label>
+          </div>
+
+          <h3 class="settings-divider">Voice & Input (Experimental)</h3>
+
+          <div class="setting-group">
+            <label>Voice Input</label>
+            <div class="sub-setting-group">
+              <label class="toggle-switch"><input type="checkbox" id="voice-input-toggle"><span class="toggle-slider"></span> Toggle microphone UI</label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label>Voice Output</label>
+            <div class="radio-group" id="voice-output-group">
+              <label><input type="radio" name="voice-output" value="text"> Text-Only</label>
+              <label><input type="radio" name="voice-output" value="synthetic"> Synthetic Voice</label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label>Speech Style</label>
+            <div class="radio-group" id="speech-style-group">
+              <label><input type="radio" name="speech-style" value="calm"> Calm Narrator</label>
+              <label><input type="radio" name="speech-style" value="energetic"> Energetic Assistant</label>
+              <label><input type="radio" name="speech-style" value="robotic"> Robotic</label>
+            </div>
+          </div>
+
+          <h3 class="settings-divider">Developer / Debug Mode</h3>
+
+          <div class="setting-group">
+            <label>System Logs & Memory</label>
+            <div class="button-group">
+              <button id="show-logs-btn" class="btn-secondary">Show System Logs</button>
+              <button id="inspect-memory-btn" class="btn-secondary">Inspect AI Memory</button>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label>Developer Tools Shortcut</label>
+            <label class="toggle-switch"><input type="checkbox" id="dev-shortcut-toggle"><span class="toggle-slider"></span> Enable Ctrl+Shift+D</label>
+          </div>
+
+          <div class="setting-group">
+            <label for="sandbox-input">Experiment Sandbox</label>
+            <textarea id="sandbox-input" class="settings-input" rows="4" placeholder="Enter JS code or an AI prompt..."></textarea>
+            <div class="sandbox-controls">
+              <div class="radio-group">
+                <label><input type="radio" name="sandbox-mode" value="js" checked> JS</label>
+                <label><input type="radio" name="sandbox-mode" value="ai"> AI Prompt</label>
+              </div>
+              <button id="run-sandbox-btn" class="btn-primary">Run</button>
+            </div>
+            <pre id="sandbox-output" class="sandbox-output"></pre>
           </div>
         </div>
       </section>
