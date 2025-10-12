@@ -22,7 +22,7 @@ const noteSortSelect = document.getElementById("note-sort-select");
 const noteCategoryTabs = document.getElementById("note-category-tabs");
 const notesListContainer = document.getElementById("notes-list-container");
 
-const navLinks = document.querySelectorAll(".nav-link");
+const navLinks = document.querySelectorAll(".sidebar-nav .nav-link, .mobile-footer-nav .nav-link");
 const pages = document.querySelectorAll(".page");
 const dashboardCards = document.querySelectorAll(".dashboard-card");
 const navSound = document.getElementById("nav-sound");
@@ -33,6 +33,7 @@ const energyLevel = document.getElementById("energy-level");
 
 
 let isInitialPageLoad = true;
+let loadedPages = new Set();
 
 // ✅ Handle page navigation
 function showPage(pageId) {
@@ -48,6 +49,25 @@ function showPage(pageId) {
   const targetPage = document.getElementById(pageId);
   if (targetPage) {
     targetPage.classList.add("active");
+  }
+
+  // Lazy load page content if it hasn't been loaded yet
+  if (!loadedPages.has(pageId)) {
+    console.log(`Lazy loading data for: ${pageId}`);
+    switch (pageId) {
+      case 'notes':
+        loadNotes();
+        break;
+      case 'reminders':
+        loadReminders();
+        break;
+      case 'home':
+        // The dashboard is simple and can be rendered anytime
+        renderDashboard();
+        break;
+      // Settings are initialized at startup to ensure they are available globally
+    }
+    loadedPages.add(pageId);
   }
 
   // Activate the corresponding nav link
@@ -67,7 +87,7 @@ function showPage(pageId) {
 
 navLinks.forEach((link) => {
   link.addEventListener("click", (e) => {
-    e.preventDefault(); // Prevent URL change
+    e.preventDefault();
     const pageId = e.target.dataset.page;
     showPage(pageId);
   });
@@ -75,6 +95,14 @@ navLinks.forEach((link) => {
 
 // ✅ Handle dashboard card clicks
 dashboardCards.forEach((card) => {
+  card.addEventListener("click", (e) => {
+    const pageId = e.currentTarget.dataset.page;
+    showPage(pageId);
+  });
+});
+
+// ✅ Handle quick action card clicks
+document.querySelectorAll(".quick-action-card").forEach((card) => {
   card.addEventListener("click", (e) => {
     const pageId = e.currentTarget.dataset.page;
     showPage(pageId);
@@ -953,8 +981,83 @@ function initializeSettings() {
       noteSearchInput.dispatchEvent(new Event('input')); // Trigger search
     }
   });
+
+  // --- Voice Interaction UI ---
+  initializeVoiceInteraction();
+
+  // --- Accordion Logic ---
+  const accordionItems = document.querySelectorAll('.accordion-item');
+  accordionItems.forEach(item => {
+    const header = item.querySelector('.accordion-header');
+    header.addEventListener('click', () => {
+      // Optional: Close other accordions
+      // document.querySelectorAll('.accordion-item.active').forEach(activeItem => activeItem.classList.remove('active'));
+      item.classList.toggle('active');
+    });
+  });
+
+  // --- Ripple Effect for Buttons ---
+  initializeRippleEffect();
 }
 
+function initializeVoiceInteraction() {
+  const voiceBtn = document.getElementById('mobile-voice-btn');
+  let listeningMessage = null;
+
+  if (!voiceBtn) return;
+
+  const startListening = () => {
+    document.body.classList.add('voice-active');
+    if (navigator.vibrate) navigator.vibrate(50);
+
+    // Show "Listening..." message
+    const wrapper = document.createElement("div");
+    wrapper.id = "listening-indicator";
+    wrapper.classList.add("message-wrapper", "earl-message-wrapper");
+    wrapper.innerHTML = `<div class="avatar">E</div><div class="message-content"><div class="message earl-message"><p>Listening...</p></div></div>`;
+    chatBox.appendChild(wrapper);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    listeningMessage = wrapper;
+    showPage('chat');
+  };
+
+  const stopListening = () => {
+    document.body.classList.remove('voice-active');
+    if (listeningMessage) {
+      listeningMessage.remove();
+      listeningMessage = null;
+    }
+    // Show "Got it" message and then fade it out
+    addMessage("E.A.R.L", "Got it, Tjay.", false);
+  };
+
+  voiceBtn.addEventListener('touchstart', startListening);
+  voiceBtn.addEventListener('touchend', stopListening);
+}
+
+function initializeRippleEffect() {
+  const rippleButtons = document.querySelectorAll('.btn-primary, .fab');
+
+  rippleButtons.forEach(button => {
+    button.addEventListener('click', function (e) {
+      const rect = button.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      const diameter = Math.max(button.clientWidth, button.clientHeight);
+      const radius = diameter / 2;
+
+      ripple.style.width = ripple.style.height = `${diameter}px`;
+      ripple.style.left = `${e.clientX - rect.left - radius}px`;
+      ripple.style.top = `${e.clientY - rect.top - radius}px`;
+      ripple.classList.add('ripple');
+
+      // Ensure only one ripple is active at a time
+      const existingRipple = button.querySelector('.ripple');
+      if (existingRipple) existingRipple.remove();
+
+      button.appendChild(ripple);
+    });
+  });
+}
 // ✅ Dynamic Identity Layer Logic
 const modes = {
   focus: { icon: '🟢', greeting: "You're in Focus Mode. Let's get things done." },
@@ -1316,36 +1419,20 @@ const StatsTracker = {
 };
 
 function renderDashboard() {
-  const { timeOfDay, weeklyModes, streak, focus, weeklyNotesCount, focusWords } = StatsTracker.getStats();
-
-  // Render Focus
-  document.getElementById('today-focus-card').textContent = focus;
-
-  // Render Streak
-  document.getElementById('learning-streak-count').textContent = streak;
-
-  // Render Learning Tracker Stats
-  document.getElementById('weekly-notes-count').textContent = weeklyNotesCount;
-
-  const focusWordsList = document.getElementById('focus-words-list');
-  focusWordsList.innerHTML = '';
-  if (focusWords.length > 0) {
-    focusWords.forEach((word, index) => {
-      const item = document.createElement('p');
-      item.className = 'focus-word-item';
-      item.innerHTML = `${index + 1}. <strong>${word}</strong>`;
-      focusWordsList.appendChild(item);
-    });
+  const settings = getAiSettings();
+  const hour = new Date().getHours();
+  let greeting = "Welcome, Tjay.";
+  if (hour < 12) {
+    greeting = "Good Morning, Tjay.";
+  } else if (hour < 18) {
+    greeting = "Good Afternoon, Tjay.";
   } else {
-    focusWordsList.innerHTML = `<p class="placeholder-text" style="margin-top: 0;">Not enough data for focus words.</p>`;
+    greeting = "Good Evening, Tjay.";
   }
 
-  // Render Creative Insight
-  document.getElementById('creative-insight-card').textContent = creativeInsight;
-
-  // Render Charts
-  renderChart('activity-hotspot-chart', timeOfDay, 'Activity');
-  renderChart('weekly-mode-chart', weeklyModes, 'Usage');
+  document.getElementById('home-greeting').textContent = greeting;
+  document.getElementById('focus-time-summary').textContent = `${settings.focusGoal} minutes`;
+  document.getElementById('ai-mode-summary').textContent = `${settings.appearance.charAt(0).toUpperCase() + settings.appearance.slice(1)}`;
 
   // Render learning time chart in settings
   const learningTimeData = StatsTracker.getLearningTimeStats();
@@ -1391,12 +1478,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize settings page
   initializeSettings();
-
-  // Run the boot sequence
-  runBootSequence();
-
-  // Render the dashboard
-  renderDashboard();
 
   const lastPage = localStorage.getItem('lastVisitedPage') || 'home';
   showPage(lastPage); // Start on the last visited page or home

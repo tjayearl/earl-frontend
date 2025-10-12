@@ -66,6 +66,22 @@ body.theme-night {
   background-size: 400% 400%;
 }
 
+/* AI Mode Theme */
+body.theme-ai {
+  background: linear-gradient(-45deg, #000000, #0d0125, #26034d, #011a31);
+  background-size: 400% 400%;
+}
+
+body.voice-active {
+  animation: pulse-bg 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-bg {
+  0% { box-shadow: inset 0 0 40px 20px color-mix(in srgb, var(--accent-color) 10%, transparent); }
+  50% { box-shadow: inset 0 0 80px 40px color-mix(in srgb, var(--accent-color) 20%, transparent); }
+  100% { box-shadow: inset 0 0 40px 20px color-mix(in srgb, var(--accent-color) 10%, transparent); }
+}
+
 .container {
   width: 95%;
   height: 95%;
@@ -80,6 +96,13 @@ body.theme-night {
   overflow: hidden;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   position: relative; /* Needed for pseudo-elements */
+  animation: breathing-ui 8s ease-in-out infinite;
+}
+
+@keyframes breathing-ui {
+  0% { border-color: color-mix(in srgb, var(--accent-color) 20%, transparent); }
+  50% { border-color: color-mix(in srgb, var(--accent-color) 50%, transparent); }
+  100% { border-color: color-mix(in srgb, var(--accent-color) 20%, transparent); }
 }
 
 body.theme-ai .container::before {
@@ -350,6 +373,44 @@ main.main-content {
   margin-top: 2rem;
 }
 
+/* --- New Home Dashboard --- */
+.home-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.home-header h1 {
+  font-size: 2.5rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+}
+.status-summary {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  color: var(--text-secondary);
+}
+.status-summary p { margin: 0; }
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.quick-action-card {
+  background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+}
+.quick-action-card:hover { transform: translateY(-5px); background-color: var(--bg-tertiary); }
+.quick-action-card h3 { margin: 0 0 0.5rem 0; font-size: 1.3rem; }
+.quick-action-card p { margin: 0; color: var(--text-secondary); }
+
 /* --- Reflection Dashboard --- */
 .reflection-grid {
   display: grid;
@@ -502,6 +563,22 @@ input {
   filter: brightness(1.2);
 }
 
+/* Ripple Effect */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.6);
+  transform: scale(0);
+  animation: ripple-effect 0.6s linear;
+}
+
+@keyframes ripple-effect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
 /* Secondary button style for clear buttons */
 .btn-secondary {
   padding: 0.4rem 0.8rem;
@@ -525,6 +602,8 @@ input {
   font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
   transition: background-color 0.2s;
 }
 .btn-danger:hover { background-color: #f87171; }
@@ -605,6 +684,10 @@ input {
   align-self: flex-end;
 }
 
+/* Pulse animation for avatar when typing */
+.typing-indicator .avatar {
+  animation: pulse-avatar 1.5s ease-in-out infinite;
+}
 /* Typing indicator styles */
 .typing-indicator .message { padding: 0.8rem 1rem; }
 .typing-indicator p {
@@ -626,6 +709,12 @@ input {
 .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
 
 @keyframes blink { 0% { opacity: 0.2; } 20% { opacity: 1; } 100% { opacity: 0.2; } }
+
+@keyframes pulse-avatar {
+  0% { transform: scale(1); box-shadow: 0 0 5px transparent; }
+  50% { transform: scale(1.05); box-shadow: 0 0 10px var(--glow-color); }
+  100% { transform: scale(1); box-shadow: 0 0 5px transparent; }
+}
 
 /* Animation for new messages */
 @keyframes slideIn {
@@ -801,11 +890,80 @@ ul#reminder-list li:hover .reminder-check::after {
   background-color: #38bdf8;
 }
 
+/* --- Mobile Footer Navigation --- */
+.mobile-footer-nav {
+  display: none; /* Hidden on desktop */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-color);
+  justify-content: space-around;
+  padding: 0.5rem 0;
+  z-index: 100;
+}
+
+.mobile-footer-nav .nav-link {
+  flex-grow: 1;
+  text-align: center;
+}
+.mobile-footer-nav .nav-link.active {
+  background: none; /* No background for active link in footer */
+  transform: scale(1.2); /* Make active icon slightly larger */
+}
+
+.mobile-voice-btn {
+  background: var(--accent-color);
+  color: var(--accent-text);
+  border: none;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-size: 1.8rem;
+  cursor: pointer;
+  position: relative;
+  top: -20px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+}
+.mobile-voice-btn:active {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px var(--glow-color);
+}
+
 /* --- Responsive Styles for Mobile --- */
 @media (max-width: 768px) {
+  .container {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    border: none;
+  }
+
+  .sidebar-nav {
+    display: none; /* Hide desktop sidebar */
+  }
+
+  .mobile-footer-nav {
+    display: flex; /* Show mobile footer */
+  }
+
+  main.main-content {
+    padding-bottom: 60px; /* Add space for the footer nav */
+  }
+
+  .identity-layer {
+    display: none; /* Hide desktop identity layer */
+  }
+  .mobile-header { display: block; } /* Show mobile header */
   .nav-link {
     padding: 0.5rem 0.75rem;
     font-size: 0.9rem;
+  }
+
+  .page {
+    padding: 0.75rem;
   }
 
   .glow {
@@ -820,6 +978,29 @@ ul#reminder-list li:hover .reminder-check::after {
     font-size: 1.1rem;
   }
 
+  .identity-grid {
+    grid-template-columns: 1fr; /* Stack identity info */
+  }
+
+  .settings-container {
+    padding: 1rem;
+  }
+
+  .slider-control {
+    grid-template-columns: 80px 1fr 50px; /* Adjust for smaller labels */
+  }
+
+  .quick-actions-grid {
+    grid-template-columns: 1fr; /* Stack quick actions on mobile */
+  }
+
+  #note-form {
+    display: none; /* Hide original form on mobile */
+  }
+
+  #note-form {
+    flex-wrap: wrap; /* Allow note form elements to wrap */
+  }
   /* Make calculator full-screen on mobile */
   #calculator {
     padding: 0; /* Remove page padding to let calculator fill */
@@ -951,6 +1132,8 @@ ul#reminder-list li:hover .reminder-check::after {
   border: 1px solid color-mix(in srgb, var(--border-color) 40%, transparent);
   box-shadow: 0 0 10px color-mix(in srgb, var(--glow-color) 10%, transparent);
   padding: 1rem;
+  position: relative; /* For swipe hints */
+  overflow: hidden; /* To hide swipe hints initially */
   border-radius: 10px;
   margin-bottom: 1rem;
   display: flex;
@@ -958,6 +1141,7 @@ ul#reminder-list li:hover .reminder-check::after {
   align-items: flex-start;
   gap: 1rem;
   animation: fadeIn 0.3s;
+  transition: transform 0.3s ease-out; /* For snapping back */
 }
 
 .note-card.pinned {
@@ -973,6 +1157,12 @@ ul#reminder-list li:hover .reminder-check::after {
   margin: 0 0 0.75rem 0;
   color: var(--text-primary);
   white-space: pre-wrap;
+  max-height: 60px; /* Snippet view */
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+}
+.note-card.expanded .note-content p {
+  max-height: 1000px; /* Expanded view */
 }
 .note-header {
   display: flex;
@@ -1019,6 +1209,22 @@ ul#reminder-list li:hover .reminder-check::after {
 }
 .note-actions button:hover { color: var(--text-primary); }
 .note-actions .pin-btn.pinned { color: var(--accent-color); }
+
+/* Swipe Action Hints */
+.swipe-hint {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--text-primary);
+  width: 80px;
+  opacity: 0;
+}
+.swipe-hint.left { left: 0; background: #ef4444; }
+.swipe-hint.right { right: 0; background: #38bdf8; }
 
 /* --- Core Identity Card --- */
 .core-identity-card {
@@ -1276,10 +1482,15 @@ input[type="range"]::-webkit-slider-thumb {
   position: absolute;
   top: 1rem;
   right: 1.5rem;
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: bold;
   cursor: pointer;
 }
+.modal-close:hover {
+  color: var(--text-primary);
+}
+
+#modal-note-input:focus { box-shadow: 0 0 15px var(--glow-color); }
 .modal-close:hover {
   color: var(--text-primary);
 }
@@ -1294,4 +1505,10 @@ input[type="range"]::-webkit-slider-thumb {
   word-wrap: break-word;
   color: var(--text-secondary);
   font-family: var(--font-mono);
+}
+
+@media (max-width: 768px) {
+  .fab {
+    display: block; /* Show FAB on mobile */
+  }
 }
