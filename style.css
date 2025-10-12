@@ -67,6 +67,25 @@ body {
   animation: fadeIn 1.5s ease-in-out;
 }
 
+/* Boot Sequence Styles */
+#boot-sequence {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.1rem;
+  color: #94a3b8;
+  text-align: left;
+  width: 300px;
+}
+#boot-sequence p {
+  margin: 0.25rem 0;
+}
+#boot-sequence .cursor {
+  display: inline-block;
+  background-color: #94a3b8;
+  width: 10px;
+  height: 1.1rem;
+  animation: blink 1s infinite;
+}
+
 /* --- New Sidebar Navigation --- */
 .sidebar-nav {
   width: 60px;
@@ -90,7 +109,17 @@ body {
   font-weight: bold;
   color: #0f172a;
   margin-bottom: 1.5rem;
+  animation: pulsate-logo 3s ease-in-out infinite;
 }
+
+@keyframes pulsate-logo {
+  0% { box-shadow: 0 0 5px #38bdf8, 0 0 10px #38bdf8; }
+  50% { box-shadow: 0 0 20px #38bdf8, 0 0 30px #38bdf8; }
+  100% { box-shadow: 0 0 5px #38bdf8, 0 0 10px #38bdf8; }
+}
+
+
+
 
 .sidebar-nav ul {
   list-style: none;

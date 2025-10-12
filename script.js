@@ -15,9 +15,13 @@ const clearRemindersBtn = document.getElementById("clear-reminders-btn");
 const navLinks = document.querySelectorAll(".nav-link");
 const pages = document.querySelectorAll(".page");
 const dashboardCards = document.querySelectorAll(".dashboard-card");
+const navSound = document.getElementById("nav-sound");
+
+let isInitialPageLoad = true;
 
 // ✅ Handle page navigation
 function showPage(pageId) {
+  const currentPage = document.querySelector('.page.active');
   // Hide all pages and deactivate all links
   pages.forEach((page) => page.classList.remove("active"));
   navLinks.forEach((link) => link.classList.remove("active"));
@@ -32,6 +36,14 @@ function showPage(pageId) {
   const targetLink = document.querySelector(`.nav-link[data-page="${pageId}"]`);
   if (targetLink) {
     targetLink.classList.add("active");
+  }
+
+  // Play sound on navigation, but not on initial load
+  if (!isInitialPageLoad && (!currentPage || currentPage.id !== pageId)) {
+    if (navSound) {
+      navSound.currentTime = 0;
+      navSound.play().catch(e => console.error("Sound play failed:", e));
+    }
   }
 }
 
@@ -422,15 +434,43 @@ function handleKeyPress(key, type) {
   updateDisplay();
 }
 
+// ✅ Console-style boot sequence on load
+function runBootSequence() {
+  const bootContainer = document.getElementById('boot-sequence');
+  const loader = document.getElementById('loader');
+  const lines = [
+    "Initializing Earl.AI...",
+    "Loading memory modules...",
+    "Welcome back, Tjay."
+  ];
+  let lineIndex = 0;
+
+  function typeLine() {
+    if (lineIndex < lines.length) {
+      const p = document.createElement('p');
+      bootContainer.appendChild(p);
+      typewriter(p, lines[lineIndex], () => {
+        lineIndex++;
+        setTimeout(typeLine, 300); // Delay between lines
+      });
+    } else {
+      // Finished typing all lines
+      setTimeout(() => {
+        loader.classList.add('hidden');
+      }, 700); // Wait a moment before hiding loader
+    }
+  }
+
+  typeLine();
+}
+
 // ✅ Load on page start
 window.addEventListener("DOMContentLoaded", async () => {
-  // Hide loader after a short delay to let animations run
-  const loader = document.getElementById('loader');
-  setTimeout(() => {
-    loader.classList.add('hidden');
-  }, 500); // Adjust delay as needed
+  // Run the boot sequence
+  runBootSequence();
 
   showPage('home'); // Start on the home page dashboard
+  isInitialPageLoad = false;
 
   try {
     const res = await fetch(`${BASE_URL}/chat/history`);

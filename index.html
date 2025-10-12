@@ -9,8 +9,7 @@
 <body>
   <div id="loader">
     <div class="loader-content">
-      <h1 class="glow">E.A.R.L AI</h1>
-      <p>Booting up...</p>
+      <div id="boot-sequence"></div>
     </div>
   </div>
   <div class="container" id="app-container">
@@ -120,6 +119,10 @@
 
     </main>
   </div>
+
+  <!-- Audio element for navigation sound -->
+  <!-- NOTE: You need to provide the sound file at this path -->
+  <audio id="nav-sound" src="sounds/nav-click.wav" preload="auto"></audio>
 
   <script src="script.js"></script>
 </body>
