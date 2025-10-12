@@ -12,6 +12,16 @@ const reminderList = document.getElementById("reminder-list");
 const clearChatBtn = document.getElementById("clear-chat-btn");
 const clearRemindersBtn = document.getElementById("clear-reminders-btn");
 
+const noteForm = document.getElementById("note-form");
+const noteInput = document.getElementById("note-input");
+const noteTagsInput = document.getElementById("note-tags-input");
+const pinnedNotesContainer = document.getElementById("pinned-notes-container");
+const noteMicIcon = document.getElementById("note-mic-icon");
+const noteSearchInput = document.getElementById("note-search-input");
+const noteSortSelect = document.getElementById("note-sort-select");
+const noteCategoryTabs = document.getElementById("note-category-tabs");
+const notesListContainer = document.getElementById("notes-list-container");
+
 const navLinks = document.querySelectorAll(".nav-link");
 const pages = document.querySelectorAll(".page");
 const dashboardCards = document.querySelectorAll(".dashboard-card");
@@ -336,6 +346,198 @@ async function clearChat() {
     console.error("Failed to clear chat:", err);
     addMessage("E.A.R.L", "⚠️ Oops, I couldn't clear the chat history.", getAiSettings().typingAnimation);
   }
+}
+
+// ✅ Notes Logic
+let notes = [];
+let noteFilters = {
+  searchTerm: '',
+  category: 'All',
+  sortBy: 'date',
+};
+
+
+function saveNotes() {
+  localStorage.setItem('notes', JSON.stringify(notes));
+}
+
+function loadNotes() {
+  const savedNotes = localStorage.getItem('notes');
+  notes = savedNotes ? JSON.parse(savedNotes) : [];
+  renderNotes();
+}
+
+function addNote(text, tags) {
+  const mood = document.querySelector('input[name="note-mood"]:checked').value;
+  const newNote = {
+    id: Date.now(),
+    text,
+    tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+    isPinned: false,
+    mood: mood,
+    createdAt: new Date().toISOString(),
+  };
+  notes.unshift(newNote);
+  saveNotes();
+  renderNotes();
+  showNoteReflection(newNote);
+  StatsTracker.logActivity('note_add');
+}
+
+function deleteNote(id) {
+  if (confirm("Are you sure you want to delete this note?")) {
+    notes = notes.filter(note => note.id !== id);
+    saveNotes();
+    renderNotes();
+  }
+}
+
+function togglePinNote(id) {
+  const note = notes.find(note => note.id === id);
+  if (!note) return;
+
+  const pinnedCount = notes.filter(n => n.isPinned).length;
+
+  if (!note.isPinned && pinnedCount >= 3) {
+    alert("You can only pin a maximum of 3 notes.");
+    return;
+  }
+
+  note.isPinned = !note.isPinned;
+  // Sort by pinned status then by date
+  notes.sort((a, b) => {
+    if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+  saveNotes();
+  renderNotes();
+}
+
+function renderNotes() {
+  pinnedNotesContainer.innerHTML = '';
+  notesListContainer.innerHTML = '';
+
+  let filteredNotes = [...notes];
+
+  // 1. Filter by category
+  if (noteFilters.category !== 'All') {
+    filteredNotes = filteredNotes.filter(note =>
+      note.tags.some(tag => tag.toLowerCase() === noteFilters.category.toLowerCase())
+    );
+  }
+
+  // 2. Filter by search term
+  if (noteFilters.searchTerm) {
+    const searchTerm = noteFilters.searchTerm.toLowerCase();
+    filteredNotes = filteredNotes.filter(note =>
+      note.text.toLowerCase().includes(searchTerm) ||
+      note.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+    );
+  }
+
+  // 3. Sort notes (pinned notes are always on top, this sorts the unpinned list)
+  switch (noteFilters.sortBy) {
+    case 'tag':
+      filteredNotes.sort((a, b) => (a.tags[0] || '').localeCompare(b.tags[0] || ''));
+      break;
+    case 'length':
+      filteredNotes.sort((a, b) => b.text.length - a.text.length);
+      break;
+    case 'random':
+      filteredNotes.sort(() => Math.random() - 0.5);
+      break;
+    case 'date':
+    default:
+      filteredNotes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      break;
+  }
+
+  if (filteredNotes.length === 0) {
+    notesListContainer.innerHTML = `<p class="placeholder-text">No notes yet. Add one above!</p>`;
+    return;
+  }
+
+  // Separate pinned notes from the filtered list
+  const pinned = notes.filter(n => n.isPinned);
+  pinned.forEach(note => renderNoteCard(note, pinnedNotesContainer));
+
+  // Render the rest of the filtered and sorted notes
+  filteredNotes.filter(n => !n.isPinned).forEach(note => renderNoteCard(note, notesListContainer));
+}
+
+function showNoteReflection(note) {
+  const reflectionEl = document.getElementById('note-reflection-message');
+  let message = "Got it, Tjay. I've archived this thought.";
+
+  const lowerText = note.text.toLowerCase();
+  const lowerTags = note.tags.map(t => t.toLowerCase());
+
+  if (lowerText.includes('learn') || lowerTags.includes('learning')) {
+    message = "Excellent. I'll tag this under 'Learning.' A great topic to explore.";
+  } else if (lowerText.includes('idea') || lowerTags.includes('ideas')) {
+    message = "Creative spark detected. I've saved this idea for you to revisit.";
+  } else if (lowerText.includes('fix') || lowerText.includes('bug') || lowerTags.includes('coding')) {
+    message = "Understood. A good technical note to remember for your projects.";
+  }
+
+  reflectionEl.textContent = message;
+  reflectionEl.style.display = 'block';
+  // The fade-out is handled by CSS animation
+  setTimeout(() => {
+    reflectionEl.style.display = 'none';
+  }, 5000); // Hide after 5 seconds
+}
+
+function summarizeNote(id) {
+  const note = notes.find(note => note.id === id);
+  if (!note) return;
+
+  const wordCount = note.text.split(/\s+/).length;
+  let summary = `This note contains ${wordCount} words and is tagged with [${note.tags.join(', ')}]. `;
+  summary += `The core idea appears to be: "${note.text.substring(0, 80)}..."`;
+
+  showModal("E.A.R.L's Reflection", summary);
+}
+
+function parseMarkdown(text) {
+  // Simple parser for bold and italic
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+    .replace(/_(.*?)_/g, '<em>$1</em>');         // Italic
+}
+
+function renderNoteCard(note, container) {
+    const noteCard = document.createElement('div');
+    noteCard.className = `note-card ${note.isPinned ? 'pinned' : ''}`;
+
+    // 1. Parse Markdown
+    const markdownText = parseMarkdown(note.text);
+    // 2. Create clickable links for hashtags
+    const linkedText = markdownText.replace(/#(\w+)/g, `<a href="#" class="note-link" data-tag="$1">#$1</a>`);
+    // 3. Format timestamp
+    const timestamp = new Date(note.createdAt).toLocaleString([], {
+      dateStyle: 'medium', timeStyle: 'short'
+    });
+
+    noteCard.innerHTML = `
+      <div class="note-content">
+        <p>${linkedText}</p>
+        <div class="note-timestamp">${timestamp}</div>
+        <div class="note-tags">
+          ${note.tags.map(tag => `<span class="note-tag">${tag}</span>`).join('')}
+        </div>
+      </div>
+      <div class="note-actions">
+        <button class="reflect-btn" title="Reflect on Note">✨</button>
+        <button class="pin-btn ${note.isPinned ? 'pinned' : ''}" title="Pin Note">📌</button>
+        <button class="delete-btn" title="Delete Note">🗑️</button>
+      </div>
+    `;
+
+    noteCard.querySelector('.pin-btn').addEventListener('click', () => togglePinNote(note.id));
+    noteCard.querySelector('.reflect-btn').addEventListener('click', () => reflectOnNote(note.id));
+    noteCard.querySelector('.delete-btn').addEventListener('click', () => deleteNote(note.id));
+    container.appendChild(noteCard);
 }
 
 // ✅ Calculator Logic for Complex Expressions
@@ -725,6 +927,32 @@ function initializeSettings() {
       console.log("Developer shortcut (Ctrl+Shift+D) enabled.");
     }
   });
+
+  // --- Note Filtering/Sorting Listeners ---
+  noteSearchInput.addEventListener('input', (e) => {
+    noteFilters.searchTerm = e.target.value;
+    renderNotes();
+  });
+  noteSortSelect.addEventListener('change', (e) => {
+    noteFilters.sortBy = e.target.value;
+    renderNotes();
+  });
+  noteCategoryTabs.addEventListener('click', (e) => {
+    if (e.target.classList.contains('category-tab')) {
+      noteCategoryTabs.querySelector('.active').classList.remove('active');
+      e.target.classList.add('active');
+      noteFilters.category = e.target.dataset.category;
+      renderNotes();
+    }
+  });
+  // Event delegation for clickable note links
+  document.querySelector('.notes-dashboard').addEventListener('click', (e) => {
+    if (e.target.classList.contains('note-link')) {
+      e.preventDefault();
+      noteSearchInput.value = e.target.dataset.tag;
+      noteSearchInput.dispatchEvent(new Event('input')); // Trigger search
+    }
+  });
 }
 
 // ✅ Dynamic Identity Layer Logic
@@ -994,6 +1222,8 @@ const StatsTracker = {
     const activities = JSON.parse(localStorage.getItem('activities')) || [];
     const sessions = JSON.parse(localStorage.getItem('sessions')) || [];
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const allNotes = JSON.parse(localStorage.getItem('notes')) || [];
 
     // 1. Activity Hotspot
     const timeOfDay = { Morning: 0, Afternoon: 0, Evening: 0 };
@@ -1049,18 +1279,69 @@ const StatsTracker = {
     const lastChat = activities.filter(a => a.type === 'chat').pop();
     const focus = lastChat ? `Revisiting your last topic: "${lastChat.message.substring(0, 40)}..."` : "Start a conversation to define your focus.";
 
-    return { timeOfDay, weeklyModes, streak, focus };
+    // 5. Weekly/Monthly Notes
+    const weeklyNotesCount = activities.filter(act => act.type === 'note_add' && new Date(act.timestamp) > oneWeekAgo).length;
+
+    // 6. Focus Words
+    const stopWords = new Set(['i','me','my','myself','we','our','ours','ourselves','you','your','yours','yourself','yourselves','he','him','his','himself','she','her','hers','herself','it','its','itself','they','them','their','theirs','themselves','what','which','who','whom','this','that','these','those','am','is','are','was','were','be','been','being','have','has','had','having','do','does','did','doing','a','an','the','and','but','if','or','because','as','until','while','of','at','by','for','with','about','against','between','into','through','during','before','after','above','below','to','from','up','down','in','out','on','off','over','under','again','further','then','once','here','there','when','where','why','how','all','any','both','each','few','more','most','other','some','such','no','nor','not','only','own','same','so','than','too','very','s','t','can','will','just','don','should','now']);
+    const wordCounts = {};
+    allNotes.forEach(note => {
+      const words = note.text.toLowerCase().match(/\b(\w+)\b/g) || [];
+      words.forEach(word => {
+        if (word.length > 2 && !stopWords.has(word)) {
+          wordCounts[word] = (wordCounts[word] || 0) + 1;
+        }
+      });
+    });
+    const focusWords = Object.entries(wordCounts)
+      .sort(([,a],[,b]) => b - a)
+      .slice(0, 3)
+      .map(([word]) => word.charAt(0).toUpperCase() + word.slice(1)); // Capitalize
+
+    // 7. Creative Insight
+    const creativeNotes = allNotes.filter(n => n.tags.includes('creative') || n.tags.includes('idea'));
+    let creativeInsight = "Not enough data to determine your creative patterns.";
+    if (creativeNotes.length > 2) {
+      const nightNotes = creativeNotes.filter(n => {
+        const hour = new Date(n.createdAt).getHours();
+        return hour >= 20 || hour <= 4; // 8pm to 4am
+      }).length;
+      if (nightNotes / creativeNotes.length > 0.5) {
+        creativeInsight = "You seem to be most creative at night. Keep capturing those late-night ideas!";
+      }
+    }
+
+    return { timeOfDay, weeklyModes, streak, focus, weeklyNotesCount, focusWords, creativeInsight };
   },
 };
 
 function renderDashboard() {
-  const { timeOfDay, weeklyModes, streak, focus } = StatsTracker.getStats();
+  const { timeOfDay, weeklyModes, streak, focus, weeklyNotesCount, focusWords } = StatsTracker.getStats();
 
   // Render Focus
   document.getElementById('today-focus-card').textContent = focus;
 
   // Render Streak
   document.getElementById('learning-streak-count').textContent = streak;
+
+  // Render Learning Tracker Stats
+  document.getElementById('weekly-notes-count').textContent = weeklyNotesCount;
+
+  const focusWordsList = document.getElementById('focus-words-list');
+  focusWordsList.innerHTML = '';
+  if (focusWords.length > 0) {
+    focusWords.forEach((word, index) => {
+      const item = document.createElement('p');
+      item.className = 'focus-word-item';
+      item.innerHTML = `${index + 1}. <strong>${word}</strong>`;
+      focusWordsList.appendChild(item);
+    });
+  } else {
+    focusWordsList.innerHTML = `<p class="placeholder-text" style="margin-top: 0;">Not enough data for focus words.</p>`;
+  }
+
+  // Render Creative Insight
+  document.getElementById('creative-insight-card').textContent = creativeInsight;
 
   // Render Charts
   renderChart('activity-hotspot-chart', timeOfDay, 'Activity');
@@ -1136,12 +1417,14 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   loadReminders();
+  loadNotes();
   }
 
   // ✅ Wire up clear buttons
   clearChatBtn.addEventListener("click", clearChat);
   clearRemindersBtn.addEventListener("click", clearAllReminders);
 
+  // ✅ Wire up notes form
   // ✅ Wire up calculator
   updateDisplay();
   calculatorKeys.addEventListener('click', (e) => {

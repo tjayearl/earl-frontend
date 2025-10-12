@@ -64,6 +64,25 @@
               <p>Days in a row</p>
             </div>
           </div>
+          <div class="reflection-card">
+            <h3>Weekly Notes</h3>
+            <div class="streak-container">
+              <span id="weekly-notes-count" class="streak-count">0</span>
+              <p>Notes added this week</p>
+            </div>
+          </div>
+          <div class="reflection-card">
+            <h3>Focus Words</h3>
+            <div id="focus-words-list" class="focus-words-container">
+              <!-- Focus words will be rendered here -->
+            </div>
+          </div>
+          <div class="reflection-card">
+            <h3>Creative Insight</h3>
+            <p id="creative-insight-card">
+              Analyzing your creative patterns...
+            </p>
+          </div>
         </div>
         </section>
 
@@ -136,8 +155,45 @@
       </section>
 
       <section id="notes" class="page">
-        <div class="section-header"><h2>Notes</h2></div>
-        <p class="placeholder-text">The "Notes" feature is coming soon!</p>
+        <div class="section-header"><h2>Knowledge Terminal</h2></div>
+        <div class="notes-controls">
+          <input type="search" id="note-search-input" class="settings-input" placeholder="Search notes...">
+          <select id="note-sort-select" class="settings-select">
+            <option value="date">Sort by Date</option>
+            <option value="tag">Sort by Tag</option>
+            <option value="length">Sort by Length</option>
+            <option value="random">Sort by Random</option>
+          </select>
+        </div>
+        <div id="note-category-tabs" class="category-tabs">
+          <button class="category-tab active" data-category="All">All</button>
+          <button class="category-tab" data-category="Learning">🧠 Learning</button>
+          <button class="category-tab" data-category="Thoughts">💭 Thoughts</button>
+          <button class="category-tab" data-category="Projects">🚀 Projects</button>
+          <button class="category-tab" data-category="Ideas">💡 Ideas</button>
+          <button class="category-tab" data-category="Experiments">🕹️ Experiments</button>
+        </div>
+        <form id="note-form">
+          <div class="note-input-wrapper">
+            <input type="text" id="note-input" placeholder="Type a thought or insight, Tjay…" required />
+            <div id="note-mic-icon" class="mic-icon"></div>
+          </div>
+          <input type="text" id="note-tags-input" placeholder="Add tags (comma-separated)" />
+          <div class="mood-selector-group">
+            <label><input type="radio" name="note-mood" value="😊" checked> 😊</label>
+            <label><input type="radio" name="note-mood" value="😐"> 😐</label>
+            <label><input type="radio" name="note-mood" value="🤔"> 🤔</label>
+            <label><input type="radio" name="note-mood" value="🚀"> 🚀</label>
+          </div>
+          <button type="submit" class="btn-primary" title="Save Note">
+            Save
+          </button>
+        </form>
+        <div id="note-reflection-message" class="note-reflection"></div>
+        <div class="notes-dashboard">
+          <div id="pinned-notes-container"></div>
+          <div id="notes-list-container"></div>
+        </div>
       </section>
 
       <section id="settings" class="page">

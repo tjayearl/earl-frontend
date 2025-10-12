@@ -386,6 +386,19 @@ main.main-content {
   text-shadow: 0 0 15px var(--glow-color);
 }
 
+.focus-words-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: auto;
+  text-align: left;
+  font-size: 1.1rem;
+}
+.focus-word-item {
+  color: var(--text-secondary);
+}
+.focus-word-item strong { color: var(--text-primary); }
+
 .chart-container { display: flex; flex-direction: column; gap: 0.75rem; }
 .chart-bar { display: flex; align-items: center; gap: 0.5rem; }
 .chart-label { flex-basis: 80px; font-size: 0.9rem; color: var(--text-muted); }
@@ -832,6 +845,180 @@ ul#reminder-list li:hover .reminder-check::after {
   .calculator-keys button[data-number] { font-size: 1.5rem; }
 
 }
+
+/* --- Notes Page Controls --- */
+.notes-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+#note-search-input {
+  flex-grow: 1;
+}
+#note-sort-select {
+  flex-basis: 180px;
+  flex-grow: 0;
+}
+
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+.category-tab {
+  background: var(--bg-tertiary);
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.category-tab:hover { background-color: var(--bg-interactive); }
+.category-tab.active { background-color: var(--accent-color); color: var(--accent-text); font-weight: bold; }
+
+/* --- Note Reflection Message --- */
+.note-reflection {
+  background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  color: var(--text-secondary);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 3px solid var(--accent-color);
+  display: none; /* Hidden by default */
+  animation: fadeIn 0.4s, fadeOut 0.4s 4.6s forwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; display: none; }
+}
+
+/* --- Notes Page Styles --- */
+#note-form {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+#note-tags-input {
+  flex-grow: 0;
+  flex-basis: 250px;
+}
+
+.note-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+#note-input {
+  padding-right: 2.5rem;
+}
+#note-mic-icon {
+  right: 0.75rem; /* Re-use mic-icon styles */
+}
+
+.mood-selector-group {
+  display: flex;
+  background: var(--bg-tertiary);
+  padding: 0.25rem;
+  border-radius: 20px;
+}
+
+.notes-dashboard {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem; /* space for scrollbar */
+}
+
+#pinned-notes-container {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1.5rem;
+}
+
+.note-card {
+  /* Glassmorphism & Neon Effect */
+  background: color-mix(in srgb, var(--bg-secondary) 50%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in srgb, var(--border-color) 40%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--glow-color) 10%, transparent);
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  animation: fadeIn 0.3s;
+}
+
+.note-card.pinned {
+  background: color-mix(in srgb, var(--accent-color) 20%, transparent);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--glow-color) 40%, transparent);
+}
+
+.note-content {
+  flex-grow: 1;
+}
+.note-content p {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+.note-content p strong { color: var(--accent-color); }
+.note-content p em { font-style: italic; color: var(--text-secondary); }
+.note-timestamp {
+  font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem;
+}
+.note-link {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+.note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.note-tag {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 0.2rem 0.6rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+}
+
+.note-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.note-actions button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.25rem;
+}
+.note-actions button:hover { color: var(--text-primary); }
+.note-actions .pin-btn.pinned { color: var(--accent-color); }
 
 /* --- Core Identity Card --- */
 .core-identity-card {
