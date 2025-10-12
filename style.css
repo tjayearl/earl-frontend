@@ -262,6 +262,12 @@ input {
   word-wrap: break-word;
   animation: slideIn 0.3s ease-out;
 }
+.message.animate-pulse {
+  animation: slideIn 0.3s ease-out, pulse-bubble 0.5s ease-in-out 0.3s;
+}
+
+@keyframes pulse-bubble { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+
 
 .message p {
   margin: 0;
@@ -319,6 +325,47 @@ input {
   display: flex;
   flex-shrink: 0; /* Prevent forms from shrinking */
   margin-top: 1rem;
+  align-items: center;
+}
+
+.chat-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+#chat-input {
+  padding-right: 2.5rem; /* Make space for the mic icon */
+}
+
+.mic-icon {
+  position: absolute;
+  right: 0.75rem;
+  width: 20px;
+  height: 20px;
+  background-color: #94a3b8;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: 0 0 0 0 rgba(148, 163, 184, 0.5);
+  animation: pulse-mic 2s infinite;
+}
+
+.mic-icon:hover {
+  background-color: #cbd5e1;
+}
+
+@keyframes pulse-mic {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(148, 163, 184, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(148, 163, 184, 0);
+  }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(148, 163, 184, 0); }
 }
 
 ul#reminder-list {
@@ -330,15 +377,48 @@ ul#reminder-list {
 
 ul#reminder-list li {
   margin: 0.5rem 0;
-  background: #1e293b;
-  padding: 0.5rem;
+  background: #334155;
+  padding: 0.75rem 1rem;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 ul#reminder-list li:hover {
-  background-color: #334155;
+  background-color: #475569;
+}
+
+/* Animated checkmark for reminders */
+.reminder-check {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #94a3b8;
+  border-radius: 50%;
+  margin-left: 1rem;
+  flex-shrink: 0;
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.reminder-check::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 6px;
+  height: 10px;
+  border: solid #94a3b8;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+ul#reminder-list li:hover .reminder-check::after {
+  opacity: 1;
 }
 
 /* --- Calculator Styles --- */

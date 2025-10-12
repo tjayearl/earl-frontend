@@ -51,20 +51,43 @@ dashboardCards.forEach((card) => {
   });
 });
 
+// ✅ Typewriter effect for E.A.R.L's messages
+function typewriter(element, text, onComplete) {
+  let i = 0;
+  element.textContent = "";
+  const typing = () => {
+    if (i < text.length) {
+      element.textContent += text.charAt(i);
+      i++;
+      chatBox.scrollTop = chatBox.scrollHeight; // Keep scrolling
+      setTimeout(typing, 25); // Adjust typing speed here
+    } else if (onComplete) {
+      onComplete();
+    }
+  };
+  typing();
+}
+
 // ✅ Adds message to chat UI
-function addMessage(sender, text) {
+function addMessage(sender, text, useTypewriter = false) {
   const messageDiv = document.createElement("div");
   messageDiv.classList.add("message");
 
   const senderClass = sender === "You" ? "user-message" : "earl-message";
   messageDiv.classList.add(senderClass);
 
+  chatBox.appendChild(messageDiv);
+
   const p = document.createElement("p");
-  p.textContent = text;
   messageDiv.appendChild(p);
 
-  chatBox.appendChild(messageDiv);
-  chatBox.scrollTop = chatBox.scrollHeight;
+  if (sender === "E.A.R.L" && useTypewriter) {
+    messageDiv.classList.add("animate-pulse");
+    typewriter(p, text, () => { /* Animation on complete if needed */ });
+  } else {
+    p.textContent = text;
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 }
 
 // ✅ Shows a "typing..." indicator
@@ -91,7 +114,7 @@ chatForm.addEventListener("submit", async (e) => {
   const message = chatInput.value.trim();
   if (!message) return;
 
-  addMessage("You", message);
+  addMessage("You", message, false);
   chatInput.value = "";
 
   showTypingIndicator();
@@ -107,10 +130,10 @@ chatForm.addEventListener("submit", async (e) => {
     }
     const data = await res.json();
     console.log("E.A.R.L replied:", data.reply);
-    addMessage("E.A.R.L", data.reply);
+    addMessage("E.A.R.L", data.reply, true); // Use typewriter for new replies
   } catch (err) {
     console.error("Chat error:", err);
-    addMessage("E.A.R.L", "⚠️ I couldn't reach my brain. Try again.");
+    addMessage("E.A.R.L", "⚠️ I couldn't reach my brain. Try again.", true);
   } finally {
     // This runs whether the try succeeds or fails
     hideTypingIndicator();
@@ -151,7 +174,12 @@ async function loadReminders() {
     reminderList.innerHTML = "";
     reminders.forEach((r) => {
       const li = document.createElement("li");
-      li.textContent = r.text;
+      const textSpan = document.createElement("span");
+      textSpan.textContent = r.text;
+      const checkDiv = document.createElement("div");
+      checkDiv.className = "reminder-check";
+      li.appendChild(textSpan);
+      li.appendChild(checkDiv);
       li.addEventListener("click", () => deleteReminder(r.id));
       reminderList.appendChild(li);
     });
@@ -217,10 +245,10 @@ async function clearChat() {
     if (!res.ok) throw new Error(`Server error: ${res.status}`);
 
     chatBox.innerHTML = ""; // Clear the UI immediately
-    addMessage("E.A.R.L", "Chat history cleared.");
+    addMessage("E.A.R.L", "Chat history cleared.", true);
   } catch (err) {
     console.error("Failed to clear chat:", err);
-    addMessage("E.A.R.L", "⚠️ Oops, I couldn't clear the chat history.");
+    addMessage("E.A.R.L", "⚠️ Oops, I couldn't clear the chat history.", true);
   }
 }
 
@@ -371,10 +399,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   try {
     const res = await fetch(`${BASE_URL}/chat/history`);
     const history = await res.json();
-    history.forEach((msg) => addMessage(msg.sender, msg.text));
+    history.forEach((msg) => addMessage(msg.sender, msg.text, false)); // Don't use typewriter for history
   } catch (err) {
     console.error("Failed to load chat history:", err);
-    addMessage("E.A.R.L", "⚠️ Couldn't load chat history.");
+    addMessage("E.A.R.L", "⚠️ Couldn't load chat history.", true);
   }
 
   loadReminders();
