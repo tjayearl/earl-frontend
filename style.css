@@ -320,7 +320,7 @@ main.main-content {
 
 .page.active {
   display: flex; /* Show the active page */
-  animation: fadeIn 0.4s ease-in-out;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 @keyframes fadeIn {
@@ -567,9 +567,10 @@ input {
 .ripple {
   position: absolute;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: color-mix(in srgb, var(--accent-color) 40%, transparent);
+  box-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color);
   transform: scale(0);
-  animation: ripple-effect 0.6s linear;
+  animation: ripple-effect 0.4s linear;
 }
 
 @keyframes ripple-effect {
@@ -1141,13 +1142,18 @@ ul#reminder-list li:hover .reminder-check::after {
   align-items: flex-start;
   gap: 1rem;
   animation: fadeIn 0.3s;
-  transition: transform 0.3s ease-out; /* For snapping back */
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out; /* For snapping back and hover */
 }
 
 .note-card.pinned {
   background: color-mix(in srgb, var(--accent-color) 20%, transparent);
   border-color: var(--accent-color);
   box-shadow: 0 0 15px color-mix(in srgb, var(--glow-color) 40%, transparent);
+}
+
+.note-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--glow-color) 25%, transparent);
 }
 
 .note-content {

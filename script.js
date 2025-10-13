@@ -1036,9 +1036,17 @@ function initializeVoiceInteraction() {
 }
 
 function initializeRippleEffect() {
-  const rippleButtons = document.querySelectorAll('.btn-primary, .fab');
+  const rippleElements = document.querySelectorAll(
+    '.btn-primary, .btn-secondary, .btn-danger, .fab, .nav-link, .quick-action-card, .dashboard-card, .calculator-keys button'
+  );
 
-  rippleButtons.forEach(button => {
+  rippleElements.forEach(button => {
+    // Ensure the element can contain the ripple
+    if (getComputedStyle(button).position === 'static') {
+      button.style.position = 'relative';
+    }
+    button.style.overflow = 'hidden';
+
     button.addEventListener('click', function (e) {
       const rect = button.getBoundingClientRect();
       const ripple = document.createElement('span');
