@@ -166,6 +166,7 @@ function addMessage(sender, text, useTypewriter = false) {
   if (sender === "E.A.R.L" && useTypewriter) {
     messageDiv.classList.add("animate-pulse");
     typewriter(p, text, () => { chatBox.scrollTop = chatBox.scrollHeight; });
+    speakText(text);
   } else {
     p.textContent = text;
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -173,6 +174,18 @@ function addMessage(sender, text, useTypewriter = false) {
 }
 
 // ✅ Shows a "typing..." indicator
+function speakText(text) {
+  const settings = getAiSettings();
+  if (settings.voiceOutput === 'synthetic' && 'speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (settings.speechStyle === 'calm') { utterance.rate = 0.9; utterance.pitch = 1.0; }
+    else if (settings.speechStyle === 'energetic') { utterance.rate = 1.1; utterance.pitch = 1.2; }
+    else if (settings.speechStyle === 'robotic') { utterance.rate = 0.8; utterance.pitch = 0.5; }
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
 function showTypingIndicator() {
   const wrapper = document.createElement("div");
   wrapper.classList.add("message-wrapper", "earl-message-wrapper", "typing-indicator");
@@ -597,7 +610,8 @@ function evaluateExpression(expression) {
   };
 
   // Create a regex to find all keys that need replacement
-  const regex = new RegExp(Object.keys(replacements).join('|'), 'g');
+  // Escape special regex characters (like ^) to ensure they are matched literally
+  const regex = new RegExp(Object.keys(replacements).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
   let sanitizedExpression = expression.replace(regex, match => replacements[match]);
 
   // Whitelist of allowed characters and patterns in the final expression
@@ -715,6 +729,7 @@ const defaultAiSettings = {
   memory: true,
   // New visual settings
   appearance: 'dark',
+  autoTheme: false,
   accent: 'blue',
   font: 'sans-serif',
   retention: 'normal',
@@ -754,7 +769,11 @@ function saveAiSettings(settings) {
 
 function initializeSettings() {
   const settings = getAiSettings();
-  applyThemeSettings(settings); // Apply visual settings on load
+  if (settings.autoTheme) {
+    applyTimeBasedTheme();
+  } else {
+    applyThemeSettings(settings); // Apply visual settings on load
+  }
 
   // Set UI elements from saved settings
   document.querySelector(`input[name="ai-tone"][value="${settings.tone}"]`).checked = true;
@@ -777,6 +796,7 @@ function initializeSettings() {
   memoryToggle.checked = settings.memory;
 
   // UX Settings
+  const autoThemeToggle = document.getElementById('auto-theme-toggle');
   const startupToggle = document.getElementById('startup-animation-toggle');
   const greetingInput = document.getElementById('greeting-message-input');
   const soundsToggle = document.getElementById('system-sounds-toggle');
@@ -840,6 +860,15 @@ function initializeSettings() {
     saveAiSettings(settings);
   });
 
+  // --- Auto Theme ---
+  autoThemeToggle.checked = settings.autoTheme;
+  autoThemeToggle.addEventListener('change', (e) => {
+    settings.autoTheme = e.target.checked;
+    saveAiSettings(settings);
+    if (settings.autoTheme) applyTimeBasedTheme();
+    else applyThemeSettings(settings);
+  });
+
   // --- New Interface Settings ---
   document.getElementById('appearance-mode-group').addEventListener('change', (e) => {
     settings.appearance = e.target.value;
@@ -897,6 +926,7 @@ function initializeSettings() {
   encryptionToggle.addEventListener('change', (e) => {
     settings.encryption = e.target.checked;
     saveAiSettings(settings);
+    toggleEncryptionVisuals(settings.encryption);
   });
 
   // --- Learning & Focus Listeners ---
@@ -920,6 +950,7 @@ function initializeSettings() {
   motivationalBoostsToggle.addEventListener('change', (e) => {
     settings.motivationalBoosts = e.target.checked;
     saveAiSettings(settings);
+    renderDashboard();
   });
 
   // --- Voice & Input Listeners ---
@@ -998,6 +1029,9 @@ function initializeSettings() {
 
   // --- Ripple Effect for Buttons ---
   initializeRippleEffect();
+
+  // Apply initial visual states
+  toggleEncryptionVisuals(settings.encryption);
 }
 
 function initializeVoiceInteraction() {
@@ -1104,6 +1138,22 @@ function applyThemeSettings(settings) {
   document.getElementById('font-select').value = settings.font;
 }
 
+function toggleEncryptionVisuals(enabled) {
+  const container = document.querySelector('.container');
+  if (enabled) {
+    container.style.fontFamily = "'Courier New', monospace";
+    container.style.border = "1px solid #0f0";
+    container.style.boxShadow = "0 0 20px #0f0";
+  } else {
+    container.style.fontFamily = "";
+    container.style.border = "";
+    container.style.boxShadow = "";
+    // Re-apply font setting
+    const settings = getAiSettings();
+    if (!settings.autoTheme) applyThemeSettings(settings);
+  }
+}
+
 function applyVoiceSettings(settings) {
   const micIcon = document.getElementById('mic-icon');
   if (micIcon) {
@@ -1114,14 +1164,17 @@ function applyVoiceSettings(settings) {
 function applyTimeBasedTheme() {
   const hour = new Date().getHours();
   const body = document.body;
-  body.classList.remove('theme-morning', 'theme-evening', 'theme-night');
+  body.classList.remove('theme-morning', 'theme-evening', 'theme-night', 'theme-light', 'theme-dark');
 
   if (hour >= 6 && hour < 17) { // 6am to 5pm
-    // body.classList.add('theme-morning'); // This is now handled by manual theme settings
+    body.classList.add('theme-morning');
+    body.classList.add('theme-light');
   } else if (hour >= 22 || hour < 6) { // 10pm to 6am
-    // body.classList.add('theme-night');
+    body.classList.add('theme-night');
+    body.classList.add('theme-dark');
   } else { // 5pm to 10pm
-    // body.classList.add('theme-evening');
+    body.classList.add('theme-evening');
+    body.classList.add('theme-dark');
   }
 }
 
@@ -1442,6 +1495,24 @@ function renderDashboard() {
   document.getElementById('focus-time-summary').textContent = `${settings.focusGoal} minutes`;
   document.getElementById('ai-mode-summary').textContent = `${settings.appearance.charAt(0).toUpperCase() + settings.appearance.slice(1)}`;
 
+  // Motivational Boosts
+  const greetingEl = document.getElementById('home-greeting');
+  const existingQuote = greetingEl.querySelector('.motivational-quote');
+  if (existingQuote) existingQuote.remove();
+
+  if (settings.motivationalBoosts) {
+    const quotes = ["The mind is everything. What you think you become.", "Focus on being productive instead of busy.", "Your future is created by what you do today.", "Small progress is still progress."];
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    const quoteSpan = document.createElement('div');
+    quoteSpan.className = 'motivational-quote';
+    quoteSpan.style.fontSize = '1rem';
+    quoteSpan.style.color = 'var(--accent-color)';
+    quoteSpan.style.marginTop = '0.5rem';
+    quoteSpan.style.fontStyle = 'italic';
+    quoteSpan.textContent = `"${randomQuote}"`;
+    greetingEl.appendChild(quoteSpan);
+  }
+
   // Render learning time chart in settings
   const learningTimeData = StatsTracker.getLearningTimeStats();
   renderChart('learning-time-chart', learningTimeData, 'Minutes');
@@ -1491,8 +1562,12 @@ window.addEventListener("DOMContentLoaded", async () => {
   showPage(lastPage); // Start on the last visited page or home
   isInitialPageLoad = false;
 
+  // Run the boot sequence to hide the loader
+  runBootSequence();
+
+  addMessage("E.A.R.L", "Greetings. I am E.A.R.L (Enhanced Assistant for Real Life).", true);
+
   if (getAiSettings().offlineMode) {
-    chatBox.innerHTML = "";
     addMessage("E.A.R.L", "Offline mode is active. Chat history is not available.", true);
     loadReminders(); // This will show the offline message for reminders
   } else {
@@ -1509,11 +1584,32 @@ window.addEventListener("DOMContentLoaded", async () => {
   loadNotes();
   }
 
+  // Focus Reminders Check
+  if (getAiSettings().focusReminders) {
+    setInterval(() => {
+      // Simple reminder logic
+      console.log("Focus Reminder: Stay on track!");
+    }, 300000); // Check every 5 minutes
+  }
+
   // ✅ Wire up clear buttons
   clearChatBtn.addEventListener("click", clearChat);
   clearRemindersBtn.addEventListener("click", clearAllReminders);
 
   // ✅ Wire up notes form
+  if (noteForm) {
+    noteForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = noteInput.value.trim();
+      const tags = noteTagsInput.value.trim();
+      if (text) {
+        addNote(text, tags);
+        noteInput.value = "";
+        noteTagsInput.value = "";
+      }
+    });
+  }
+
   // ✅ Wire up calculator
   updateDisplay();
   calculatorKeys.addEventListener('click', (e) => {
